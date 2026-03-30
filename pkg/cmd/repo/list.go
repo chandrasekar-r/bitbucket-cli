@@ -70,7 +70,7 @@ func newCmdList(f *cmdutil.Factory) *cobra.Command {
 		},
 	}
 
-	cmd.Flags().IntVarP(&limit, "limit", "L", 30, "Maximum number of repositories to list")
+	cmd.Flags().IntVarP(&limit, "limit", "L", 30, "Maximum number of repositories to list (0 = all)")
 	cmd.Flags().StringVar(&language, "language", "", "Filter by programming language")
 	jsonOpts = cmdutil.AddJSONFlags(cmd)
 	return cmd

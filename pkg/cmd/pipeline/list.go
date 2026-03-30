@@ -75,7 +75,7 @@ func newCmdList(f *cmdutil.Factory) *cobra.Command {
 		},
 	}
 
-	cmd.Flags().IntVarP(&limit, "limit", "L", 20, "Maximum number of pipeline runs to list")
+	cmd.Flags().IntVarP(&limit, "limit", "L", 20, "Maximum number of pipeline runs to list (0 = all)")
 	cmd.Flags().StringVar(&branch, "branch", "", "Filter by branch name")
 	jsonOpts = cmdutil.AddJSONFlags(cmd)
 	return cmd

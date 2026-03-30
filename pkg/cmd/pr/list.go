@@ -69,7 +69,7 @@ func newCmdList(f *cmdutil.Factory) *cobra.Command {
 	}
 
 	cmd.Flags().StringVar(&state, "state", "OPEN", "Filter by state: OPEN, MERGED, DECLINED")
-	cmd.Flags().IntVarP(&limit, "limit", "L", 30, "Maximum number of PRs to list")
+	cmd.Flags().IntVarP(&limit, "limit", "L", 30, "Maximum number of PRs to list (0 = all)")
 	jsonOpts = cmdutil.AddJSONFlags(cmd)
 	return cmd
 }
