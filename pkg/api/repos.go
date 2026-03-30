@@ -145,3 +145,14 @@ func (c *Client) RenameRepo(workspace, slug, newName string) (*Repository, error
 	}
 	return &r, nil
 }
+
+// HasIssues reports whether the repository has the issue tracker enabled.
+// Issue commands must call this before making any /issues API calls to return
+// a friendly error instead of a confusing 404.
+func (c *Client) HasIssues(workspace, slug string) (bool, error) {
+	r, err := c.GetRepo(workspace, slug)
+	if err != nil {
+		return false, err
+	}
+	return r.HasIssues, nil
+}

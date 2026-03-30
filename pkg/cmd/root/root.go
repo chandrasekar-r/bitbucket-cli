@@ -11,9 +11,11 @@ import (
 	"github.com/chandrasekar-r/bitbucket-cli/pkg/cmd/completion"
 	authcmd "github.com/chandrasekar-r/bitbucket-cli/pkg/cmd/auth"
 	branchcmd "github.com/chandrasekar-r/bitbucket-cli/pkg/cmd/branch"
+	issuecmd "github.com/chandrasekar-r/bitbucket-cli/pkg/cmd/issue"
 	pipelinecmd "github.com/chandrasekar-r/bitbucket-cli/pkg/cmd/pipeline"
 	prcmd "github.com/chandrasekar-r/bitbucket-cli/pkg/cmd/pr"
 	repocmd "github.com/chandrasekar-r/bitbucket-cli/pkg/cmd/repo"
+	snippetcmd "github.com/chandrasekar-r/bitbucket-cli/pkg/cmd/snippet"
 	versioncmd "github.com/chandrasekar-r/bitbucket-cli/pkg/cmd/version"
 	workspacecmd "github.com/chandrasekar-r/bitbucket-cli/pkg/cmd/workspace"
 	"github.com/chandrasekar-r/bitbucket-cli/pkg/cmdutil"
@@ -163,9 +165,10 @@ Start with: bb auth login`,
 	cmd.AddCommand(branchcmd.NewCmdBranch(f))
 	cmd.AddCommand(prcmd.NewCmdPR(f))
 	cmd.AddCommand(pipelinecmd.NewCmdPipeline(f))
+	cmd.AddCommand(issuecmd.NewCmdIssue(f))
+	cmd.AddCommand(snippetcmd.NewCmdSnippet(f))
 	cmd.AddCommand(versioncmd.NewCmdVersion(f))
 	cmd.AddCommand(completion.NewCmdCompletion(f))
-	// Phase 6+: issue, snippet
 
 	return cmd, f
 }
