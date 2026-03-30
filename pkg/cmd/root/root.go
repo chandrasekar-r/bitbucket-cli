@@ -10,7 +10,9 @@ import (
 	bbauth "github.com/chandrasekar-r/bitbucket-cli/pkg/auth"
 	"github.com/chandrasekar-r/bitbucket-cli/pkg/cmd/completion"
 	authcmd "github.com/chandrasekar-r/bitbucket-cli/pkg/cmd/auth"
+	repocmd "github.com/chandrasekar-r/bitbucket-cli/pkg/cmd/repo"
 	versioncmd "github.com/chandrasekar-r/bitbucket-cli/pkg/cmd/version"
+	workspacecmd "github.com/chandrasekar-r/bitbucket-cli/pkg/cmd/workspace"
 	"github.com/chandrasekar-r/bitbucket-cli/pkg/cmdutil"
 	"github.com/chandrasekar-r/bitbucket-cli/pkg/config"
 	"github.com/chandrasekar-r/bitbucket-cli/pkg/gitcontext"
@@ -151,9 +153,11 @@ Start with: bb auth login`,
 
 	// Register all subcommand groups
 	cmd.AddCommand(authcmd.NewCmdAuth(f))
+	cmd.AddCommand(workspacecmd.NewCmdWorkspace(f))
+	cmd.AddCommand(repocmd.NewCmdRepo(f))
 	cmd.AddCommand(versioncmd.NewCmdVersion(f))
 	cmd.AddCommand(completion.NewCmdCompletion(f))
-	// Phase 3+: repo, pr, branch, pipeline, issue, snippet, workspace
+	// Phase 4+: pr, branch, pipeline, issue, snippet
 
 	return cmd, f
 }
