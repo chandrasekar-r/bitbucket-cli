@@ -1,7 +1,7 @@
 ---
 title: "feat: bb — Bitbucket Cloud CLI"
 type: feat
-status: active
+status: completed
 date: 2026-03-30
 origin: docs/brainstorms/2026-03-30-bb-cli-requirements.md
 ---
@@ -27,9 +27,10 @@ Bitbucket Cloud has no official CLI tool. Teams are forced to use the web UI or 
 A statically compiled Go binary distributed via GitHub Releases, Homebrew, Scoop/Winget, and deb/rpm packages. Commands follow the `bb <noun> <verb>` pattern (`bb pr create`, `bb repo clone`, `bb pipeline watch`). The tool infers workspace and repo context from git remote URLs, uses OAuth 2.0 for authentication with Bitbucket API Token as a headless fallback, and outputs tables for humans and JSON for scripts.
 
 Key decisions carried forward from origin document:
+
 - **Go** — single static binary, factory DI pattern (see origin: `docs/brainstorms/2026-03-30-bb-cli-requirements.md`)
 - **Binary name: `bb`** — mirrors `gh`, Bitbucket's natural abbreviation
-- **OAuth 2.0 Authorization Code + loopback redirect** as primary auth; **Bitbucket API Token** (Basic auth) as fallback — *NOT app passwords, which are sunset June 9, 2026*
+- **OAuth 2.0 Authorization Code + loopback redirect** as primary auth; **Bitbucket API Token** (Basic auth) as fallback — _NOT app passwords, which are sunset June 9, 2026_
 - **Bundled OAuth consumer credentials** injected at build time via `ldflags`
 - **Interactive prompts by default**, `--no-tty` disables
 - **`--json [fields]` + `--jq [expr]`** on all data commands
@@ -205,11 +206,11 @@ bb pr list --json id,title,state,author
 
 #### Exit Codes (SpecFlow Gap 13 — resolved)
 
-| Code | Meaning |
-|------|---------|
-| `0` | Success |
-| `1` | General error (API error, not found, etc.) |
-| `2` | Command misuse (bad arguments, missing required flags) |
+| Code | Meaning                                                |
+| ---- | ------------------------------------------------------ |
+| `0`  | Success                                                |
+| `1`  | General error (API error, not found, etc.)             |
+| `2`  | Command misuse (bad arguments, missing required flags) |
 
 `bb pipeline watch` additionally:
 | Code | Meaning |
@@ -273,18 +274,18 @@ In `--no-tty` mode: respects a `--clone` flag; does not prompt.
 
 ### Library Stack
 
-| Purpose | Library | Version |
-|---------|---------|---------|
-| Commands | `spf13/cobra` | v1.9+ |
-| Config | `spf13/viper` | v1.19+ |
-| OAuth 2.0 | `golang.org/x/oauth2` | latest |
-| Token storage | File-based (V1); `99designs/keyring` (V2) | — |
-| jq filtering | `itchyny/gojq` | v0.12+ |
-| Prompts | `charmbracelet/huh` | v0.6+ |
-| TUI (future) | `charmbracelet/bubbletea` + `bubbles` | — |
-| Terminal styling | `charmbracelet/lipgloss` | v1.0+ |
-| Release automation | `goreleaser/goreleaser` | v2.x |
-| Linux packages | `goreleaser/nfpm` | bundled with GoReleaser |
+| Purpose            | Library                                   | Version                 |
+| ------------------ | ----------------------------------------- | ----------------------- |
+| Commands           | `spf13/cobra`                             | v1.9+                   |
+| Config             | `spf13/viper`                             | v1.19+                  |
+| OAuth 2.0          | `golang.org/x/oauth2`                     | latest                  |
+| Token storage      | File-based (V1); `99designs/keyring` (V2) | —                       |
+| jq filtering       | `itchyny/gojq`                            | v0.12+                  |
+| Prompts            | `charmbracelet/huh`                       | v0.6+                   |
+| TUI (future)       | `charmbracelet/bubbletea` + `bubbles`     | —                       |
+| Terminal styling   | `charmbracelet/lipgloss`                  | v1.0+                   |
+| Release automation | `goreleaser/goreleaser`                   | v2.x                    |
+| Linux packages     | `goreleaser/nfpm`                         | bundled with GoReleaser |
 
 > **Note:** `AlecAivazis/survey` is archived — do not use. Use `charmbracelet/huh` for all interactive prompts.
 
@@ -367,6 +368,7 @@ func main() {
 - [ ] Wire `BITBUCKET_TOKEN` + `BITBUCKET_USERNAME` env vars in `pkg/cmdutil/factory.go` HTTP client builder — if set, bypass stored credentials; used for CI headless mode
 
 **Test stubs:**
+
 - `pkg/auth/oauth_test.go` — test state validation, code extraction from callback URL
 - `pkg/auth/store_test.go` — test concurrent lock behavior (two goroutines racing to refresh)
 - `pkg/cmd/auth/login/login_test.go` — mock HTTP, test `--with-token` flow
@@ -586,26 +588,26 @@ bb pr create
 
 ## Risk Analysis
 
-| Risk | Severity | Mitigation |
-|------|----------|-----------|
-| App password sunset June 9, 2026 | High | Already mitigated — spec explicitly forbids app password auth; only API tokens supported |
-| Rotating refresh token enforcement May 4, 2026 | High | File lock in `auth/refresh.go` prevents race; must ship before this date |
-| PKCE not confirmed by Bitbucket | Medium | Auth Code + loopback works without PKCE; attempt PKCE first, retry without on error |
-| Bitbucket rate limit (1,000 req/hr) | Medium | Pipeline watch default 10s interval; auto-slow on 80% usage; pagelen=100 to minimize calls |
-| GoReleaser Homebrew `brews:` deprecation | Low | Use `homebrew_casks:` from day one; not a migration issue |
-| `go-survey` is archived | Low | Using `charmbracelet/huh` from day one; not a migration issue |
+| Risk                                           | Severity | Mitigation                                                                                 |
+| ---------------------------------------------- | -------- | ------------------------------------------------------------------------------------------ |
+| App password sunset June 9, 2026               | High     | Already mitigated — spec explicitly forbids app password auth; only API tokens supported   |
+| Rotating refresh token enforcement May 4, 2026 | High     | File lock in `auth/refresh.go` prevents race; must ship before this date                   |
+| PKCE not confirmed by Bitbucket                | Medium   | Auth Code + loopback works without PKCE; attempt PKCE first, retry without on error        |
+| Bitbucket rate limit (1,000 req/hr)            | Medium   | Pipeline watch default 10s interval; auto-slow on 80% usage; pagelen=100 to minimize calls |
+| GoReleaser Homebrew `brews:` deprecation       | Low      | Use `homebrew_casks:` from day one; not a migration issue                                  |
+| `go-survey` is archived                        | Low      | Using `charmbracelet/huh` from day one; not a migration issue                              |
 
 ---
 
 ## Deferred to Planning → Now Resolved
 
-| Question | Resolution |
-|----------|-----------|
-| Pipeline log streaming vs. polling | Polling with byte-range requests; no SSE endpoint exists in Bitbucket API |
-| PKCE support | Attempt PKCE; if Bitbucket rejects `code_challenge`, retry without — not documented as supported |
-| `.bb` per-repo config format | Same YAML schema as global config; Viper `AddConfigPath(".")` picks up `.bb.yaml` in CWD |
-| GoReleaser vs. Makefile | GoReleaser for all release artifacts; Makefile wraps `goreleaser release --snapshot` for local testing |
-| Default workspace determination | Resolution order: `--workspace` flag → `BITBUCKET_WORKSPACE` env → git remote inference → config default → error |
+| Question                           | Resolution                                                                                                       |
+| ---------------------------------- | ---------------------------------------------------------------------------------------------------------------- |
+| Pipeline log streaming vs. polling | Polling with byte-range requests; no SSE endpoint exists in Bitbucket API                                        |
+| PKCE support                       | Attempt PKCE; if Bitbucket rejects `code_challenge`, retry without — not documented as supported                 |
+| `.bb` per-repo config format       | Same YAML schema as global config; Viper `AddConfigPath(".")` picks up `.bb.yaml` in CWD                         |
+| GoReleaser vs. Makefile            | GoReleaser for all release artifacts; Makefile wraps `goreleaser release --snapshot` for local testing           |
+| Default workspace determination    | Resolution order: `--workspace` flag → `BITBUCKET_WORKSPACE` env → git remote inference → config default → error |
 
 ---
 
