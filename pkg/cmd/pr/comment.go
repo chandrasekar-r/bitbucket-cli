@@ -88,7 +88,12 @@ func openEditor() (string, error) {
 	f.Close()
 	defer os.Remove(fname)
 
-	cmd := exec.Command(editor, fname)
+	// Split $EDITOR on whitespace so "nano -R" or "code --wait" work correctly.
+	// exec.Command does not invoke a shell, so without splitting, EDITOR="/usr/bin/env bash -c payload"
+	// would pass "bash -c payload" as arguments to /usr/bin/env — an injection path.
+	parts := strings.Fields(editor)
+	editorArgs := append(parts[1:], fname)
+	cmd := exec.Command(parts[0], editorArgs...)
 	cmd.Stdin = os.Stdin
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr

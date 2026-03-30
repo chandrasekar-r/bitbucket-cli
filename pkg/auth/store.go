@@ -94,13 +94,27 @@ func (s *TokenStore) Save(tf *tokenFile) error {
 	if err != nil {
 		return fmt.Errorf("marshaling token store: %w", err)
 	}
-	// Atomic write: temp file → rename
-	tmp := s.path + ".tmp"
-	if err := os.WriteFile(tmp, data, 0600); err != nil {
+	// FINDING-005: use a randomly-named temp file (not a predictable .tmp path)
+	// to eliminate the window where tokens are readable at a known location.
+	dir := dirOf(s.path)
+	tmpFile, err := os.CreateTemp(dir, ".tokens-*.tmp")
+	if err != nil {
+		return fmt.Errorf("creating temp token file: %w", err)
+	}
+	tmpName := tmpFile.Name()
+	if _, err := tmpFile.Write(data); err != nil {
+		tmpFile.Close()
+		os.Remove(tmpName)
 		return fmt.Errorf("writing token store: %w", err)
 	}
-	if err := os.Rename(tmp, s.path); err != nil {
-		os.Remove(tmp)
+	if err := tmpFile.Chmod(0600); err != nil {
+		tmpFile.Close()
+		os.Remove(tmpName)
+		return fmt.Errorf("setting token file permissions: %w", err)
+	}
+	tmpFile.Close()
+	if err := os.Rename(tmpName, s.path); err != nil {
+		os.Remove(tmpName)
 		return fmt.Errorf("committing token store: %w", err)
 	}
 	return nil

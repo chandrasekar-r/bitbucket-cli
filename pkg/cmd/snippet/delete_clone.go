@@ -2,14 +2,31 @@ package snippet
 
 import (
 	"fmt"
+	"net/url"
 	"os"
 	"os/exec"
+	"strings"
 
 	"github.com/chandrasekar-r/bitbucket-cli/pkg/api"
 	"github.com/chandrasekar-r/bitbucket-cli/pkg/cmdutil"
 	"github.com/charmbracelet/huh"
 	"github.com/spf13/cobra"
 )
+
+func validateSnippetCloneURL(rawURL string) error {
+	if strings.HasPrefix(rawURL, "-") {
+		return fmt.Errorf("clone URL must not begin with '-': %q", rawURL)
+	}
+	parsed, err := url.Parse(rawURL)
+	if err != nil {
+		return fmt.Errorf("invalid clone URL: %w", err)
+	}
+	allowed := map[string]bool{"https": true, "ssh": true, "git": true}
+	if !allowed[parsed.Scheme] {
+		return fmt.Errorf("clone URL has unsafe scheme %q", parsed.Scheme)
+	}
+	return nil
+}
 
 func newCmdDelete(f *cmdutil.Factory) *cobra.Command {
 	var force bool
@@ -83,8 +100,12 @@ func newCmdClone(f *cmdutil.Factory) *cobra.Command {
 				return fmt.Errorf("no HTTPS clone URL available for snippet %s", id)
 			}
 
+			// Validate URL scheme before passing to git (FINDING-003)
+			if err := validateSnippetCloneURL(cloneURL); err != nil {
+				return err
+			}
 			fmt.Fprintf(f.IOStreams.Out, "Cloning snippet %s...\n", id)
-			gitCmd := exec.Command("git", "clone", cloneURL)
+			gitCmd := exec.Command("git", "clone", "--", cloneURL)
 			gitCmd.Stdout = os.Stdout
 			gitCmd.Stderr = os.Stderr
 			return gitCmd.Run()
