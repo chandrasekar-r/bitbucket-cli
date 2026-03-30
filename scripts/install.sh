@@ -48,8 +48,15 @@ TMP=$(mktemp -d)
 trap 'rm -rf "$TMP"' EXIT
 
 curl -fsSL "$URL" -o "$TMP/$ARCHIVE"
-tar -xzf "$TMP/$ARCHIVE" -C "$TMP" "$BINARY"
-install -m 755 "$TMP/$BINARY" "$INSTALL_DIR/$BINARY"
+tar -xzf "$TMP/$ARCHIVE" -C "$TMP"
+
+# Install — use sudo if we don't have write access to INSTALL_DIR
+if [ -w "$INSTALL_DIR" ]; then
+  install -m 755 "$TMP/$BINARY" "$INSTALL_DIR/$BINARY"
+else
+  echo "Installing to $INSTALL_DIR requires sudo..."
+  sudo install -m 755 "$TMP/$BINARY" "$INSTALL_DIR/$BINARY"
+fi
 
 echo "bb ${VERSION} installed to ${INSTALL_DIR}/${BINARY}"
-bb version
+"$INSTALL_DIR/$BINARY" version
