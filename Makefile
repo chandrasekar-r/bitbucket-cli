@@ -14,7 +14,8 @@ build: ## Build bb binary (output: ./bin/bb)
 			-X github.com/chandrasekar-r/bitbucket-cli/internal/version.Version=$(shell git describe --tags --always 2>/dev/null || echo dev) \
 			-X github.com/chandrasekar-r/bitbucket-cli/internal/version.Commit=$(shell git rev-parse --short HEAD 2>/dev/null || echo none) \
 			-X github.com/chandrasekar-r/bitbucket-cli/internal/version.BuildDate=$(shell date -u +%Y-%m-%dT%H:%M:%SZ) \
-			-X github.com/chandrasekar-r/bitbucket-cli/internal/version.OAuthClientID=$(BB_OAUTH_CLIENT_ID)" \
+			-X github.com/chandrasekar-r/bitbucket-cli/internal/version.OAuthClientID=$(BB_OAUTH_CLIENT_ID) \
+			-X github.com/chandrasekar-r/bitbucket-cli/internal/version.OAuthClientSecret=$(BB_OAUTH_CLIENT_SECRET)" \
 		-o bin/bb ./cmd/bb
 	@echo "Built: bin/bb"
 

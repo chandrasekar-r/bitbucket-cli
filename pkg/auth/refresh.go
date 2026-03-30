@@ -71,7 +71,6 @@ func exchangeRefreshToken(refreshToken string) (accessToken, newRefreshToken str
 	body := url.Values{
 		"grant_type":    {"refresh_token"},
 		"refresh_token": {refreshToken},
-		"client_id":     {clientID},
 	}
 
 	req, err := http.NewRequest("POST", tokenURL, strings.NewReader(body.Encode()))
@@ -80,6 +79,13 @@ func exchangeRefreshToken(refreshToken string) (accessToken, newRefreshToken str
 	}
 	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 	req.Header.Set("Accept", "application/json")
+	// Bitbucket requires Basic auth with client_id:client_secret for token exchange
+	if secret := version.OAuthClientSecret; secret != "" {
+		req.SetBasicAuth(clientID, secret)
+	} else {
+		// Fallback: client_id in body (works for some Bitbucket consumer configurations)
+		body.Set("client_id", clientID)
+	}
 
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {

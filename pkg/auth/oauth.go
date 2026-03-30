@@ -60,7 +60,8 @@ func RunOAuthFlow(ctx context.Context) (*OAuthResult, error) {
 	redirectURI := fmt.Sprintf("http://127.0.0.1:%d/callback", port)
 
 	cfg := &oauth2.Config{
-		ClientID: clientID,
+		ClientID:     clientID,
+		ClientSecret: version.OAuthClientSecret, // used in token exchange Basic auth
 		Endpoint: oauth2.Endpoint{
 			AuthURL:  authURL,
 			TokenURL: tokenURL,

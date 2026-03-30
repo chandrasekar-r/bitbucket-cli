@@ -28,5 +28,6 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           BB_OAUTH_CLIENT_ID: ${{ secrets.BB_OAUTH_CLIENT_ID }}
+          BB_OAUTH_CLIENT_SECRET: ${{ secrets.BB_OAUTH_CLIENT_SECRET }}
           HOMEBREW_TAP_TOKEN: ${{ secrets.HOMEBREW_TAP_TOKEN }}
           SCOOP_BUCKET_TOKEN: ${{ secrets.SCOOP_BUCKET_TOKEN }}

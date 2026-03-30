@@ -29,6 +29,7 @@ builds:
       - -X github.com/chandrasekar-r/bitbucket-cli/internal/version.BuildDate={{.Date}}
       - -X github.com/chandrasekar-r/bitbucket-cli/internal/version.Commit={{.FullCommit}}
       - -X github.com/chandrasekar-r/bitbucket-cli/internal/version.OAuthClientID={{.Env.BB_OAUTH_CLIENT_ID}}
+      - -X github.com/chandrasekar-r/bitbucket-cli/internal/version.OAuthClientSecret={{.Env.BB_OAUTH_CLIENT_SECRET}}
 
 # Merge macOS Intel + ARM64 into a single universal binary
 universal_binaries:
