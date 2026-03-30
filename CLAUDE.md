@@ -123,10 +123,12 @@ Release artifacts (via GoReleaser on tag push):
 
 ## Implementation Status
 
-- ✅ Phase 1 — Foundation (this)
-- ⬜ Phase 2 — Authentication (`bb auth login/logout/status/token`)
-- ⬜ Phase 3 — Workspace & Repositories
-- ⬜ Phase 4 — Branches & Pull Requests
-- ⬜ Phase 5 — Pipelines
-- ⬜ Phase 6 — Issues & Snippets
-- ⬜ Phase 7 — Distribution & Polish
+- ✅ Phase 1 — Foundation
+- ✅ Phase 2 — Authentication (`bb auth login/logout/status/token`)
+- ✅ Phase 3 — Workspace & Repositories
+- ✅ Phase 4 — Branches & Pull Requests
+- ✅ Phase 5 — Pipelines
+- ✅ Phase 6 — Issues & Snippets
+- ✅ Phase 7 — Distribution & Polish
+
+**All phases complete.** The CLI is feature-complete and production-ready.
