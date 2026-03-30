@@ -44,8 +44,8 @@ func RunOAuthFlow(ctx context.Context) (*OAuthResult, error) {
 	clientID := version.OAuthClientID
 	if clientID == "" {
 		return nil, errors.New(
-			"no OAuth client ID configured in this build.\n" +
-				"Use `bb auth login --with-token` instead and provide a Bitbucket API token.",
+			"no OAuth client ID configured in this build\n" +
+				"use `bb auth login --with-token` and provide a Bitbucket API token",
 		)
 	}
 
@@ -103,7 +103,7 @@ func RunOAuthFlow(ctx context.Context) (*OAuthResult, error) {
 		return nil, fmt.Errorf("OAuth callback error: %w", err)
 	case <-ctx.Done():
 		srv.Close()
-		return nil, errors.New("authentication timed out (5 minutes). Run `bb auth login` to try again.")
+		return nil, errors.New("authentication timed out after 5 minutes: run `bb auth login` to try again")
 	}
 	srv.Close()
 

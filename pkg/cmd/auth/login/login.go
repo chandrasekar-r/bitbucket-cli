@@ -98,7 +98,7 @@ func persistAndReport(f *cmdutil.Factory, username, accessToken, refreshToken st
 
 	user, err := apiClient.GetUser()
 	if err != nil {
-		return fmt.Errorf("validating credentials: %w\nEnsure the token has the required scopes.", err)
+		return fmt.Errorf("validating credentials: %w\nensure the token has the required scopes", err)
 	}
 
 	workspaces, _ := apiClient.GetUserWorkspaces() // non-fatal

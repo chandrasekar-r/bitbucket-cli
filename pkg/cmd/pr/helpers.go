@@ -18,7 +18,7 @@ func repoContext(f *cmdutil.Factory) (workspace, slug string, err error) {
 	if werr != nil {
 		return "", "", werr
 	}
-	return ws, "", fmt.Errorf("no repo found. Run from a cloned Bitbucket repository.")
+	return ws, "", fmt.Errorf("no repo found: run from inside a cloned Bitbucket repository")
 }
 
 // parsePRID parses a PR number from a string argument.

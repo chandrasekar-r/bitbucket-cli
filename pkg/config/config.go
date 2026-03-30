@@ -35,7 +35,9 @@ func Load() (*Config, error) {
 	// Environment variable bindings
 	v.SetEnvPrefix("BB")
 	v.AutomaticEnv()
-	v.BindEnv(KeyDefaultWorkspace, "BITBUCKET_WORKSPACE")
+	if err := v.BindEnv(KeyDefaultWorkspace, "BITBUCKET_WORKSPACE"); err != nil {
+		return nil, fmt.Errorf("binding env var: %w", err)
+	}
 
 	// Defaults
 	v.SetDefault(KeyAPIBaseURL, "https://api.bitbucket.org/2.0")

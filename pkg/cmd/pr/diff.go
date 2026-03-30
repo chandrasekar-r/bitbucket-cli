@@ -74,7 +74,3 @@ func newCmdBrowse(f *cmdutil.Factory) *cobra.Command {
 	return cmd
 }
 
-// openBrowser opens a URL in the system browser (wraps browser.Open for use in comment.go).
-func openBrowser(url string) error {
-	return browser.Open(url)
-}

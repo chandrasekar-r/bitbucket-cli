@@ -73,5 +73,5 @@ func resolveRepoBranch(f *cmdutil.Factory) (workspace, slug string, err error) {
 	if werr != nil {
 		return "", "", werr
 	}
-	return ws, "", fmt.Errorf("could not determine repository. Run from inside a cloned Bitbucket repo.")
+	return ws, "", fmt.Errorf("could not determine repository: run from inside a cloned Bitbucket repo")
 }

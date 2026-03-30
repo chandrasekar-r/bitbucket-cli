@@ -120,17 +120,6 @@ func (c *Client) GetPR(workspace, slug string, id int) (*PullRequest, error) {
 
 // CreatePR opens a new pull request.
 func (c *Client) CreatePR(workspace, slug string, opts CreatePROptions) (*PullRequest, error) {
-	type repoRef struct {
-		FullName string `json:"full_name,omitempty"`
-	}
-	type branchRef struct {
-		Name       string   `json:"name"`
-		Repository *repoRef `json:"repository,omitempty"`
-	}
-	type reviewerRef struct {
-		Username string `json:"username"`
-	}
-
 	body := map[string]interface{}{
 		"title":               opts.Title,
 		"description":         opts.Description,

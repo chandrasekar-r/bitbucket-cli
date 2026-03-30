@@ -38,12 +38,11 @@ func newCmdCheckout(f *cmdutil.Factory) *cobra.Command {
 			fmt.Fprintf(f.IOStreams.Out, "Checking out branch %q...\n", branch)
 
 			// Fetch + checkout
+			// Fetch the branch; ignore error — branch may already exist locally
 			fetchCmd := exec.Command("git", "fetch", "origin", branch+":"+branch)
 			fetchCmd.Stdout = os.Stdout
 			fetchCmd.Stderr = os.Stderr
-			if err := fetchCmd.Run(); err != nil {
-				// Branch might already exist locally; try checkout directly
-			}
+			_ = fetchCmd.Run()
 
 			checkoutCmd := exec.Command("git", "checkout", branch)
 			checkoutCmd.Stdout = os.Stdout

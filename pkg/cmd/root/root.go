@@ -69,8 +69,8 @@ func NewCmdRoot() (*cobra.Command, *cmdutil.Factory) {
 		ws := cfg.DefaultWorkspace()
 		if ws == "" {
 			return "", errors.New(
-				"no workspace found. Set one with: bb workspace use <slug>\n" +
-					"Or set the BITBUCKET_WORKSPACE environment variable.",
+				"no workspace found: set one with `bb workspace use <slug>`\n" +
+					"or set the BITBUCKET_WORKSPACE environment variable",
 			)
 		}
 		return ws, nil
@@ -143,7 +143,9 @@ Start with: bb auth login`,
 		SilenceErrors: true,
 		PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
 			ios.SetNoTTY(noTTY)
-			viper.BindPFlags(cmd.Flags())
+			if err := viper.BindPFlags(cmd.Flags()); err != nil {
+				return fmt.Errorf("binding flags: %w", err)
+			}
 			return nil
 		},
 	}

@@ -1,0 +1,12 @@
+version: "2"
+
+run:
+  timeout: 5m
+  modules-download-mode: readonly
+
+linters:
+  disable:
+    # errcheck is disabled for this CLI tool: fmt.Print*, deferred Close/Unlock,
+    # and http.Server.Serve errors are not actionable in a terminal application.
+    # Critical error paths (BindPFlags, BindEnv) are explicitly checked in code.
+    - errcheck
