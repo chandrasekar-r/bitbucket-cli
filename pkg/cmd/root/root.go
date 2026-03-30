@@ -7,9 +7,11 @@ import (
 	"os"
 
 	"github.com/chandrasekar-r/bitbucket-cli/pkg/api"
-	"github.com/chandrasekar-r/bitbucket-cli/pkg/cmdutil"
+	bbauth "github.com/chandrasekar-r/bitbucket-cli/pkg/auth"
 	"github.com/chandrasekar-r/bitbucket-cli/pkg/cmd/completion"
+	authcmd "github.com/chandrasekar-r/bitbucket-cli/pkg/cmd/auth"
 	versioncmd "github.com/chandrasekar-r/bitbucket-cli/pkg/cmd/version"
+	"github.com/chandrasekar-r/bitbucket-cli/pkg/cmdutil"
 	"github.com/chandrasekar-r/bitbucket-cli/pkg/config"
 	"github.com/chandrasekar-r/bitbucket-cli/pkg/gitcontext"
 	"github.com/chandrasekar-r/bitbucket-cli/pkg/iostreams"
@@ -41,11 +43,11 @@ func NewCmdRoot() (*cobra.Command, *cmdutil.Factory) {
 		return cachedConfig, nil
 	}
 
-	// Workspace resolution chain:
+	// Workspace resolution chain (highest → lowest priority):
 	// 1. --workspace flag
-	// 2. BITBUCKET_WORKSPACE env var (handled by Viper binding in config)
-	// 3. git remote inference
-	// 4. config default_workspace
+	// 2. BITBUCKET_WORKSPACE env var
+	// 3. git remote URL inference
+	// 4. default_workspace in config file
 	resolveWorkspace := func() (string, error) {
 		if workspaceFlag != "" {
 			return workspaceFlag, nil
@@ -70,27 +72,56 @@ func NewCmdRoot() (*cobra.Command, *cmdutil.Factory) {
 		return ws, nil
 	}
 
-	// HTTP client factory — currently returns an unauthenticated client.
-	// Phase 2 (auth package) will replace this with a token-aware transport.
-	getHTTPClient := func() (*http.Client, error) {
-		// Check for env-var based token auth (CI/headless mode)
-		username := os.Getenv("BITBUCKET_USERNAME")
-		token := os.Getenv("BITBUCKET_TOKEN")
-		if username != "" && token != "" {
+	// buildHTTPClient returns an authenticated http.Client.
+	// Priority:
+	//  1. BITBUCKET_USERNAME + BITBUCKET_TOKEN env vars (CI/headless)
+	//  2. Stored OAuth token from ~/.config/bb/tokens.json
+	//     — transparently refreshes expired tokens (with file lock)
+	//  3. Unauthenticated (for `bb auth login` and `bb version` which don't need auth)
+	buildHTTPClient := func() (*http.Client, error) {
+		// 1. Environment variable token auth
+		envUsername := os.Getenv("BITBUCKET_USERNAME")
+		envToken := os.Getenv("BITBUCKET_TOKEN")
+		if envUsername != "" && envToken != "" {
 			return &http.Client{
 				Transport: api.NewRetryTransport(&api.TokenTransport{
-					Username: username,
-					Token:    token,
+					Username: envUsername,
+					Token:    envToken,
 				}),
 			}, nil
 		}
-		// Unauthenticated for now — Phase 2 wires up OAuth token storage
-		return &http.Client{Transport: api.NewRetryTransport(nil)}, nil
+
+		// 2. Stored credentials
+		store := bbauth.NewTokenStore()
+		acc, err := store.GetActive()
+		if err != nil || acc == nil {
+			// Not authenticated — return bare client; commands that need auth will fail with clear errors
+			return &http.Client{Transport: api.NewRetryTransport(nil)}, nil
+		}
+
+		// Refresh expired OAuth tokens (transparent to the caller)
+		if acc.IsExpired() && acc.AuthType == bbauth.AuthTypeOAuth {
+			if rfErr := bbauth.RefreshAccessToken(store, acc.Username); rfErr != nil {
+				return nil, &cmdutil.AuthError{Message: "session expired. Run: bb auth login"}
+			}
+			acc, err = store.GetActive()
+			if err != nil || acc == nil {
+				return nil, &cmdutil.AuthError{Message: "could not load refreshed token. Run: bb auth login"}
+			}
+		}
+
+		var transport http.RoundTripper
+		if acc.AuthType == bbauth.AuthTypeToken {
+			transport = &api.TokenTransport{Username: acc.Username, Token: acc.AccessToken}
+		} else {
+			transport = &bearerTransport{token: acc.AccessToken}
+		}
+		return &http.Client{Transport: api.NewRetryTransport(transport)}, nil
 	}
 
 	f := &cmdutil.Factory{
 		IOStreams:   ios,
-		HttpClient: getHTTPClient,
+		HttpClient: buildHTTPClient,
 		Config:     getConfig,
 		BaseURL:    api.DefaultBaseURL,
 		Workspace:  resolveWorkspace,
@@ -107,38 +138,40 @@ Start with: bb auth login`,
 		SilenceUsage:  true,
 		SilenceErrors: true,
 		PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
-			// Apply --no-tty flag to IOStreams
 			ios.SetNoTTY(noTTY)
-			// Bind Cobra flags to Viper after parsing
 			viper.BindPFlags(cmd.Flags())
 			return nil
 		},
 	}
 
-	// Persistent flags available on every subcommand
 	cmd.PersistentFlags().StringVarP(&workspaceFlag, "workspace", "w", "",
 		"Bitbucket workspace slug (overrides BITBUCKET_WORKSPACE env and config)")
 	cmd.PersistentFlags().BoolVar(&noTTY, "no-tty", false,
-		"Disable interactive prompts; commands requiring confirmation will error unless --force is also set")
+		"Disable interactive prompts; use --force on destructive operations")
 
-	// Register subcommands
+	// Register all subcommand groups
+	cmd.AddCommand(authcmd.NewCmdAuth(f))
 	cmd.AddCommand(versioncmd.NewCmdVersion(f))
 	cmd.AddCommand(completion.NewCmdCompletion(f))
-	// Phase 2+: auth, repo, pr, branch, pipeline, issue, snippet, workspace commands added here
+	// Phase 3+: repo, pr, branch, pipeline, issue, snippet, workspace
 
 	return cmd, f
 }
 
-// Execute runs the root command with os.Args and exits with an appropriate code.
+// Execute runs the root command and exits with an appropriate code.
 func Execute() {
 	cmd, _ := NewCmdRoot()
 	if err := cmd.Execute(); err != nil {
-		var authErr *cmdutil.AuthError
-		if errors.As(err, &authErr) {
-			fmt.Fprintf(os.Stderr, "Error: %s\n", err)
-			os.Exit(1)
-		}
 		fmt.Fprintf(os.Stderr, "Error: %s\n", err)
 		os.Exit(1)
 	}
+}
+
+// bearerTransport adds an OAuth Bearer token Authorization header.
+type bearerTransport struct{ token string }
+
+func (t *bearerTransport) RoundTrip(req *http.Request) (*http.Response, error) {
+	req = req.Clone(req.Context())
+	req.Header.Set("Authorization", "Bearer "+t.token)
+	return http.DefaultTransport.RoundTrip(req)
 }
