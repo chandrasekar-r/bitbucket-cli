@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/chandrasekar-r/bitbucket-cli/pkg/api"
+	bbauth "github.com/chandrasekar-r/bitbucket-cli/pkg/auth"
 	"github.com/chandrasekar-r/bitbucket-cli/pkg/cmdutil"
 	"github.com/charmbracelet/huh"
 	"github.com/spf13/cobra"
@@ -105,8 +106,12 @@ func newCmdCreate(f *cmdutil.Factory) *cobra.Command {
 					fmt.Fprintln(f.IOStreams.ErrOut, "Could not determine clone URL")
 					return nil
 				}
+				cloneURL, err = bbauth.InjectCloneAuth(cloneURL)
+				if err != nil {
+					return err
+				}
 				fmt.Fprintf(f.IOStreams.Out, "Cloning into %s...\n", name)
-				gitCmd := exec.Command("git", "clone", cloneURL)
+				gitCmd := exec.Command("git", "clone", "--", cloneURL)
 				gitCmd.Stdout = os.Stdout
 				gitCmd.Stderr = os.Stderr
 				if err := gitCmd.Run(); err != nil {

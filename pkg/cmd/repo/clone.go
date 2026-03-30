@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"github.com/chandrasekar-r/bitbucket-cli/pkg/api"
+	bbauth "github.com/chandrasekar-r/bitbucket-cli/pkg/auth"
 	"github.com/chandrasekar-r/bitbucket-cli/pkg/cmdutil"
 	"github.com/spf13/cobra"
 )
@@ -71,6 +72,13 @@ func newCmdClone(f *cmdutil.Factory) *cobra.Command {
 
 			// FINDING-003: validate URL scheme before passing to git
 			if err := validateCloneURL(cloneURL); err != nil {
+				return err
+			}
+
+			// Inject stored credentials into HTTPS URL so git doesn't prompt for a password.
+			// Bitbucket format: https://x-token-auth:{token}@bitbucket.org/...
+			cloneURL, err = bbauth.InjectCloneAuth(cloneURL)
+			if err != nil {
 				return err
 			}
 

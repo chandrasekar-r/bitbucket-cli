@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"github.com/chandrasekar-r/bitbucket-cli/pkg/api"
+	bbauth "github.com/chandrasekar-r/bitbucket-cli/pkg/auth"
 	"github.com/chandrasekar-r/bitbucket-cli/pkg/cmdutil"
 	"github.com/charmbracelet/huh"
 	"github.com/spf13/cobra"
@@ -102,6 +103,10 @@ func newCmdClone(f *cmdutil.Factory) *cobra.Command {
 
 			// Validate URL scheme before passing to git (FINDING-003)
 			if err := validateSnippetCloneURL(cloneURL); err != nil {
+				return err
+			}
+			cloneURL, err = bbauth.InjectCloneAuth(cloneURL)
+			if err != nil {
 				return err
 			}
 			fmt.Fprintf(f.IOStreams.Out, "Cloning snippet %s...\n", id)
