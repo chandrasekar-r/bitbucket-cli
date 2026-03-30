@@ -87,7 +87,10 @@ func exchangeRefreshToken(refreshToken string) (accessToken, newRefreshToken str
 		body.Set("client_id", clientID)
 	}
 
-	resp, err := http.DefaultClient.Do(req)
+	// FINDING-006: use a dedicated client with a timeout so a slow/hanging token
+	// endpoint cannot hold the exclusive file lock open indefinitely.
+	refreshClient := &http.Client{Timeout: 30 * time.Second}
+	resp, err := refreshClient.Do(req)
 	if err != nil {
 		return "", "", time.Time{}, fmt.Errorf("token refresh request failed: %w", err)
 	}

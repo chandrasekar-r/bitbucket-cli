@@ -83,7 +83,9 @@ func openEditorForComment() (string, error) {
 	f.Close()
 	defer os.Remove(fname)
 
-	editorCmd := exec.Command(editor, fname)
+	parts := strings.Fields(editor)
+	editorArgs := append(parts[1:], fname)
+	editorCmd := exec.Command(parts[0], editorArgs...)
 	editorCmd.Stdin = os.Stdin
 	editorCmd.Stdout = os.Stdout
 	editorCmd.Stderr = os.Stderr

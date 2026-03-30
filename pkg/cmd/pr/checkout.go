@@ -38,13 +38,15 @@ func newCmdCheckout(f *cmdutil.Factory) *cobra.Command {
 			fmt.Fprintf(f.IOStreams.Out, "Checking out branch %q...\n", branch)
 
 			// Fetch + checkout
-			// Fetch the branch; ignore error — branch may already exist locally
-			fetchCmd := exec.Command("git", "fetch", "origin", branch+":"+branch)
+			// FINDING-002: prepend "--" to prevent a branch name beginning with "-"
+			// (e.g. "--upload-pack=/evil") from being interpreted as a git flag.
+			// This is the same class as CVE-2017-1000117.
+			fetchCmd := exec.Command("git", "fetch", "origin", "--", branch+":"+branch)
 			fetchCmd.Stdout = os.Stdout
 			fetchCmd.Stderr = os.Stderr
 			_ = fetchCmd.Run()
 
-			checkoutCmd := exec.Command("git", "checkout", branch)
+			checkoutCmd := exec.Command("git", "checkout", "--", branch)
 			checkoutCmd.Stdout = os.Stdout
 			checkoutCmd.Stderr = os.Stderr
 			if err := checkoutCmd.Run(); err != nil {

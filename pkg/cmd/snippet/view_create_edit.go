@@ -5,6 +5,7 @@ import (
 	"io"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"strings"
 
 	"github.com/chandrasekar-r/bitbucket-cli/pkg/api"
@@ -185,7 +186,13 @@ func newCmdEdit(f *cmdutil.Factory) *cobra.Command {
 			original, _ := io.ReadAll(resp.Body)
 			resp.Body.Close()
 
-			tmp, err := os.CreateTemp("", "bb-snippet-*-"+firstFile)
+			// FINDING-004: sanitize API-controlled filename to prevent path traversal
+			// in os.CreateTemp — filepath.Base strips any directory separators.
+			safeFilename := filepath.Base(firstFile)
+			if safeFilename == "." || safeFilename == "" {
+				safeFilename = "snippet"
+			}
+			tmp, err := os.CreateTemp("", "bb-snippet-*-"+safeFilename)
 			if err != nil {
 				return err
 			}
@@ -194,7 +201,11 @@ func newCmdEdit(f *cmdutil.Factory) *cobra.Command {
 			tmp.Close()
 			defer os.Remove(tmpName)
 
-			editorCmd := exec.Command(editor, tmpName)
+			// FINDING-001: split $EDITOR on whitespace so "code --wait" works correctly
+			// and prevents argument injection via EDITOR="/usr/bin/env bash -c payload".
+			parts := strings.Fields(editor)
+			editorArgs := append(parts[1:], tmpName)
+			editorCmd := exec.Command(parts[0], editorArgs...)
 			editorCmd.Stdin = os.Stdin
 			editorCmd.Stdout = os.Stdout
 			editorCmd.Stderr = os.Stderr
