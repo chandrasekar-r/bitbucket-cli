@@ -10,7 +10,7 @@ import (
 
 func TestListBranches(t *testing.T) {
 	client, _ := newTestClient(t, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		json.NewEncoder(w).Encode(map[string]interface{}{
+		encodeJSON(t, w, map[string]interface{}{
 			"values": []map[string]interface{}{
 				{
 					"name": "main",
@@ -18,9 +18,7 @@ func TestListBranches(t *testing.T) {
 						"hash": "abc1234567890",
 						"date": "2026-03-30T10:00:00Z",
 						"author": map[string]interface{}{
-							"user": map[string]string{
-								"username": "alice",
-							},
+							"user": map[string]string{"username": "alice"},
 						},
 					},
 				},
@@ -30,9 +28,7 @@ func TestListBranches(t *testing.T) {
 						"hash": "def9876543210",
 						"date": "2026-03-29T08:00:00Z",
 						"author": map[string]interface{}{
-							"user": map[string]string{
-								"username": "bob",
-							},
+							"user": map[string]string{"username": "bob"},
 						},
 					},
 				},
@@ -52,19 +48,19 @@ func TestListBranches(t *testing.T) {
 	if branches[0].Name != "main" {
 		t.Errorf("first branch name: got %q", branches[0].Name)
 	}
-	if branches[0].ShortHash() != "abc1234" {
-		t.Errorf("short hash: got %q, want %q", branches[0].ShortHash(), "abc1234")
+	if got := branches[0].ShortHash(); got != "abc1234" {
+		t.Errorf("short hash: got %q, want %q", got, "abc1234")
 	}
 }
 
 func TestListPRs(t *testing.T) {
 	client, _ := newTestClient(t, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		json.NewEncoder(w).Encode(map[string]interface{}{
+		encodeJSON(t, w, map[string]interface{}{
 			"values": []map[string]interface{}{
 				{
-					"id":    1,
-					"title": "Add login feature",
-					"state": "OPEN",
+					"id":     1,
+					"title":  "Add login feature",
+					"state":  "OPEN",
 					"author": map[string]string{"username": "alice", "display_name": "Alice"},
 					"source": map[string]interface{}{
 						"branch": map[string]string{"name": "feat/login"},
@@ -108,11 +104,14 @@ func TestMergePR(t *testing.T) {
 			t.Errorf("expected POST, got %s", r.Method)
 		}
 		var body map[string]interface{}
-		json.NewDecoder(r.Body).Decode(&body)
+		if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+			t.Errorf("decoding request body: %v", err)
+			return
+		}
 		if body["merge_strategy"] != "squash" {
 			t.Errorf("merge_strategy: got %v", body["merge_strategy"])
 		}
-		json.NewEncoder(w).Encode(map[string]interface{}{
+		encodeJSON(t, w, map[string]interface{}{
 			"id":    42,
 			"title": "My PR",
 			"state": "MERGED",

@@ -17,13 +17,22 @@ func newTestClient(t *testing.T, handler http.Handler) (*api.Client, *httptest.S
 	return api.New(httpClient, srv.URL), srv
 }
 
+// encodeJSON writes a JSON response and fails the test if encoding fails.
+// Uses t.Errorf (not t.Fatalf) because HTTP handlers run in a separate goroutine.
+func encodeJSON(t *testing.T, w http.ResponseWriter, v any) {
+	t.Helper()
+	if err := json.NewEncoder(w).Encode(v); err != nil {
+		t.Errorf("encoding JSON response: %v", err)
+	}
+}
+
 func TestListWorkspaces(t *testing.T) {
 	client, _ := newTestClient(t, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.URL.Path != "/workspaces" {
 			http.NotFound(w, r)
 			return
 		}
-		json.NewEncoder(w).Encode(map[string]interface{}{
+		encodeJSON(t, w, map[string]interface{}{
 			"values": []map[string]string{
 				{"slug": "ws1", "name": "Workspace One", "type": "team"},
 				{"slug": "ws2", "name": "Workspace Two", "type": "user"},
@@ -47,7 +56,7 @@ func TestListWorkspaces(t *testing.T) {
 
 func TestListRepos(t *testing.T) {
 	client, _ := newTestClient(t, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		json.NewEncoder(w).Encode(map[string]interface{}{
+		encodeJSON(t, w, map[string]interface{}{
 			"values": []map[string]interface{}{
 				{"slug": "my-repo", "name": "my-repo", "is_private": false, "language": "go"},
 				{"slug": "other-repo", "name": "other-repo", "is_private": true, "language": "python"},
@@ -67,14 +76,14 @@ func TestListRepos(t *testing.T) {
 	if repos[0].Slug != "my-repo" {
 		t.Errorf("first repo slug: got %q", repos[0].Slug)
 	}
-	if repos[1].IsPrivate != true {
+	if !repos[1].IsPrivate {
 		t.Error("expected second repo to be private")
 	}
 }
 
 func TestGetRepo(t *testing.T) {
 	client, _ := newTestClient(t, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		json.NewEncoder(w).Encode(map[string]interface{}{
+		encodeJSON(t, w, map[string]interface{}{
 			"slug":      "my-repo",
 			"full_name": "myws/my-repo",
 			"language":  "go",
@@ -109,14 +118,14 @@ func TestPagination(t *testing.T) {
 		switch page {
 		case 1:
 			baseURL := "http://" + r.Host
-			json.NewEncoder(w).Encode(map[string]interface{}{
+			encodeJSON(t, w, map[string]interface{}{
 				"values":  []map[string]string{{"slug": "repo1"}},
 				"pagelen": 1,
 				"size":    2,
 				"next":    baseURL + "/repositories/ws?page=2",
 			})
 		case 2:
-			json.NewEncoder(w).Encode(map[string]interface{}{
+			encodeJSON(t, w, map[string]interface{}{
 				"values":  []map[string]string{{"slug": "repo2"}},
 				"pagelen": 1,
 				"size":    2,

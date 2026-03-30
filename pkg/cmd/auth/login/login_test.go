@@ -35,11 +35,16 @@ func mockServer(t *testing.T, username string) *httptest.Server {
 	t.Helper()
 	return httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
+		encode := func(v any) {
+			if err := json.NewEncoder(w).Encode(v); err != nil {
+				t.Errorf("encoding JSON response: %v", err)
+			}
+		}
 		switch r.URL.Path {
 		case "/2.0/user":
-			json.NewEncoder(w).Encode(api.User{Username: username, DisplayName: "Test User"})
+			encode(api.User{Username: username, DisplayName: "Test User"})
 		case "/2.0/workspaces":
-			json.NewEncoder(w).Encode(map[string]interface{}{
+			encode(map[string]interface{}{
 				"values":  []map[string]interface{}{{"slug": "ws1"}},
 				"pagelen": 1, "size": 1,
 			})
