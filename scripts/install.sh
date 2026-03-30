@@ -26,6 +26,11 @@ detect_arch() {
 OS=$(detect_os)
 ARCH=$(detect_arch)
 
+# macOS uses a universal binary (darwin_all) — covers both Intel and Apple Silicon
+if [ "$OS" = "darwin" ]; then
+  ARCH="all"
+fi
+
 # Fetch latest release tag from GitHub API
 VERSION=$(curl -fsSL "https://api.github.com/repos/${REPO}/releases/latest" \
   | grep '"tag_name"' | sed 's/.*"tag_name": *"\([^"]*\)".*/\1/')
