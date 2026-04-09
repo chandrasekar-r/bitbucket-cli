@@ -2,7 +2,9 @@ package pr
 
 import (
 	"fmt"
+	"os"
 	"os/exec"
+	"regexp"
 	"strings"
 
 	"github.com/chandrasekar-r/bitbucket-cli/pkg/api"
@@ -74,6 +76,26 @@ func newCmdCreate(f *cmdutil.Factory) *cobra.Command {
 					base = repo.MainBranch.Name
 				} else {
 					base = "main"
+				}
+			}
+
+			// Auto-generate description if not provided via --body flag
+			if body == "" {
+				// Try PR template first
+				if tmpl := loadPRTemplate(); tmpl != "" {
+					body = tmpl
+				} else {
+					// Fall back to commit log
+					commits := getCommitsBetween(base)
+					body = formatCommitsAsDescription(commits)
+				}
+			}
+
+			// Auto-link Jira ticket if branch name contains a key
+			if jiraKey := extractJiraKey(currentBranch); jiraKey != "" {
+				jiraLink := fmt.Sprintf("\n\nRelated: %s", jiraKey)
+				if !strings.Contains(body, jiraKey) {
+					body += jiraLink
 				}
 			}
 
@@ -157,5 +179,59 @@ func currentGitBranch() (string, error) {
 		return "", fmt.Errorf("not on a named branch (detached HEAD)")
 	}
 	return branch, nil
+}
+
+// getCommitsBetween returns short log lines between base branch and HEAD.
+func getCommitsBetween(base string) []string {
+	out, err := exec.Command("git", "log", "--oneline", base+"..HEAD").Output()
+	if err != nil {
+		return nil
+	}
+	var commits []string
+	for _, line := range strings.Split(strings.TrimSpace(string(out)), "\n") {
+		if line != "" {
+			commits = append(commits, line)
+		}
+	}
+	return commits
+}
+
+// formatCommitsAsDescription turns commit log lines into a PR description body.
+func formatCommitsAsDescription(commits []string) string {
+	if len(commits) == 0 {
+		return ""
+	}
+	if len(commits) == 1 {
+		// Single commit: use the full message (minus hash) as description
+		parts := strings.SplitN(commits[0], " ", 2)
+		if len(parts) == 2 {
+			return parts[1]
+		}
+		return commits[0]
+	}
+	var b strings.Builder
+	b.WriteString("## Changes\n\n")
+	for _, c := range commits {
+		parts := strings.SplitN(c, " ", 2)
+		if len(parts) == 2 {
+			b.WriteString("- " + parts[1] + "\n")
+		}
+	}
+	return b.String()
+}
+
+// extractJiraKey extracts a JIRA-style key (e.g. PROJ-123) from a branch name.
+func extractJiraKey(branch string) string {
+	re := regexp.MustCompile(`[A-Z][A-Z0-9]+-\d+`)
+	return re.FindString(branch)
+}
+
+// loadPRTemplate reads .bitbucket/PULL_REQUEST_TEMPLATE.md if it exists.
+func loadPRTemplate() string {
+	data, err := os.ReadFile(".bitbucket/PULL_REQUEST_TEMPLATE.md")
+	if err != nil {
+		return ""
+	}
+	return string(data)
 }
 
