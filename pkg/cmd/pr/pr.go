@@ -22,9 +22,11 @@ func NewCmdPR(f *cmdutil.Factory) *cobra.Command {
   bb pr checkout <number>   Check out a PR's source branch
   bb pr comment <number>    Add a comment to a pull request
   bb pr diff <number>       Show the pull request diff
+  bb pr edit <number>       Edit a pull request
   bb pr browse <number>     Open pull request in browser`,
 	}
 	cmd.AddCommand(newCmdList(f))
+	cmd.AddCommand(newCmdEdit(f))
 	cmd.AddCommand(newCmdView(f))
 	cmd.AddCommand(newCmdCreate(f))
 	cmd.AddCommand(newCmdMerge(f))
