@@ -94,7 +94,6 @@ release:
   github:
     owner: chandrasekar-r
     name: bitbucket-cli
-  draft: true # Human reviews before publishing
 
 changelog:
   sort: asc
