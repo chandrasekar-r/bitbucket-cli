@@ -17,6 +17,7 @@ import (
 	prcmd "github.com/chandrasekar-r/bitbucket-cli/pkg/cmd/pr"
 	repocmd "github.com/chandrasekar-r/bitbucket-cli/pkg/cmd/repo"
 	snippetcmd "github.com/chandrasekar-r/bitbucket-cli/pkg/cmd/snippet"
+	statuscmd "github.com/chandrasekar-r/bitbucket-cli/pkg/cmd/status"
 	versioncmd "github.com/chandrasekar-r/bitbucket-cli/pkg/cmd/version"
 	workspacecmd "github.com/chandrasekar-r/bitbucket-cli/pkg/cmd/workspace"
 	"github.com/chandrasekar-r/bitbucket-cli/pkg/cmdutil"
@@ -169,6 +170,7 @@ Start with: bb auth login`,
 	cmd.AddCommand(pipelinecmd.NewCmdPipeline(f))
 	cmd.AddCommand(issuecmd.NewCmdIssue(f))
 	cmd.AddCommand(snippetcmd.NewCmdSnippet(f))
+	cmd.AddCommand(statuscmd.NewCmdStatus(f))
 	cmd.AddCommand(versioncmd.NewCmdVersion(f))
 	cmd.AddCommand(completion.NewCmdCompletion(f))
 
