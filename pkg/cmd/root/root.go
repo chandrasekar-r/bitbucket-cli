@@ -8,6 +8,7 @@ import (
 
 	"github.com/chandrasekar-r/bitbucket-cli/pkg/api"
 	bbauth "github.com/chandrasekar-r/bitbucket-cli/pkg/auth"
+	apicmd "github.com/chandrasekar-r/bitbucket-cli/pkg/cmd/api"
 	"github.com/chandrasekar-r/bitbucket-cli/pkg/cmd/completion"
 	authcmd "github.com/chandrasekar-r/bitbucket-cli/pkg/cmd/auth"
 	branchcmd "github.com/chandrasekar-r/bitbucket-cli/pkg/cmd/branch"
@@ -159,6 +160,7 @@ Start with: bb auth login`,
 		"Disable interactive prompts; use --force on destructive operations")
 
 	// Register all subcommand groups
+	cmd.AddCommand(apicmd.NewCmdAPI(f))
 	cmd.AddCommand(authcmd.NewCmdAuth(f))
 	cmd.AddCommand(workspacecmd.NewCmdWorkspace(f))
 	cmd.AddCommand(repocmd.NewCmdRepo(f))
