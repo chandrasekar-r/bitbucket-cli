@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="bb is a fast, cross-platform Bitbucket Cloud CLI — manage pull requests, pipelines, repos, and more without leaving your terminal.">
+  <title>bb — Bitbucket Cloud CLI</title>
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- ════════════════════════════ NAV ════════════════════════════════ -->
+<nav class="nav" id="nav">
+  <div class="nav-inner">
+    <a href="#" class="nav-logo">
+      <svg class="nav-logo-icon" viewBox="0 0 32 32" fill="none" aria-hidden="true">
+        <rect width="32" height="32" rx="8" fill="#2563EB"/>
+        <path d="M8 22L12 10H14.5L16 17.5L17.5 10H20L24 22H21.5L19.5 15L18 22H14L12.5 15L10.5 22H8Z" fill="white"/>
+      </svg>
+      <span>bb</span>
+    </a>
+    <button class="nav-toggle" id="nav-toggle" aria-label="Toggle menu" aria-expanded="false">
+      <span></span><span></span><span></span>
+    </button>
+    <div class="nav-links" id="nav-links">
+      <a href="#reference">Reference</a>
+      <a href="https://github.com/chandrasekar-r/bitbucket-cli/releases" target="_blank" rel="noopener">Releases</a>
+      <a href="https://github.com/chandrasekar-r/bitbucket-cli/blob/main/CHANGELOG.md" target="_blank" rel="noopener">Changelog</a>
+      <a href="https://github.com/chandrasekar-r/bitbucket-cli" class="nav-github" target="_blank" rel="noopener">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor" aria-hidden="true"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg>
+        GitHub
+      </a>
+    </div>
+  </div>
+</nav>
+
+<!-- ════════════════════════════ HERO ═══════════════════════════════ -->
+<section class="hero">
+  <div class="hero-content">
+    <div class="hero-text">
+      <div class="hero-badge">Free &amp; Open Source &middot; v0.3.0</div>
+      <h1 class="hero-headline">
+        Take Bitbucket<br>to the command line.
+      </h1>
+      <p class="hero-sub">
+        <code>bb</code> is a fast, cross-platform CLI for Bitbucket Cloud.
+        Manage pull requests, pipelines, repos, branches, and more&nbsp;&mdash;
+        without leaving your terminal.
+      </p>
+
+      <div class="install-block">
+        <div class="install-tabs-wrap">
+          <input type="radio" name="platform" id="p-mac" checked>
+          <input type="radio" name="platform" id="p-linux">
+          <input type="radio" name="platform" id="p-win">
+
+          <div class="install-tab-labels">
+            <label for="p-mac">
+              <svg viewBox="0 0 24 24" width="13" height="13" fill="currentColor" aria-hidden="true"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/></svg>
+              macOS
+            </label>
+            <label for="p-linux">
+              <svg viewBox="0 0 24 24" width="13" height="13" fill="currentColor" aria-hidden="true"><circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 8v4l3 3" stroke="currentColor" stroke-width="2" fill="none"/></svg>
+              Linux
+            </label>
+            <label for="p-win">
+              <svg viewBox="0 0 24 24" width="13" height="13" fill="currentColor" aria-hidden="true"><path d="M0 3.449L9.75 2.1v9.451H0m10.949-9.602L24 0v11.4H10.949M0 12.6h9.75v9.451L0 20.699M10.949 12.749H24V24l-12.9-1.801"/></svg>
+              Windows
+            </label>
+          </div>
+
+          <div class="install-cmd" id="cmd-mac">
+            <code class="install-code">brew install chandrasekar-r/tap/bb</code>
+            <button class="copy-btn" data-copy="brew install chandrasekar-r/tap/bb" aria-label="Copy to clipboard">
+              <svg class="icon-copy" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+              <svg class="icon-check" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
+            </button>
+          </div>
+          <div class="install-cmd" id="cmd-linux">
+            <code class="install-code">curl -fsSL https://raw.githubusercontent.com/chandrasekar-r/bitbucket-cli/main/scripts/install.sh | sh</code>
+            <button class="copy-btn" data-copy="curl -fsSL https://raw.githubusercontent.com/chandrasekar-r/bitbucket-cli/main/scripts/install.sh | sh" aria-label="Copy to clipboard">
+              <svg class="icon-copy" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+              <svg class="icon-check" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
+            </button>
+          </div>
+          <div class="install-cmd" id="cmd-win">
+            <code class="install-code">scoop bucket add chandrasekar-r https://github.com/chandrasekar-r/scoop-bucket &amp;&amp; scoop install bb</code>
+            <button class="copy-btn" data-copy="scoop bucket add chandrasekar-r https://github.com/chandrasekar-r/scoop-bucket && scoop install bb" aria-label="Copy to clipboard">
+              <svg class="icon-copy" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+              <svg class="icon-check" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
+            </button>
+          </div>
+        </div>
+        <a href="#install" class="hero-cta">All platforms &darr;</a>
+      </div>
+    </div>
+
+    <div class="hero-terminal" aria-hidden="true">
+      <div class="terminal-window">
+        <div class="terminal-bar">
+          <span class="dot dot-red"></span>
+          <span class="dot dot-yellow"></span>
+          <span class="dot dot-green"></span>
+          <span class="terminal-title">bb &mdash; zsh</span>
+        </div>
+        <div class="terminal-body">
+          <div class="tl t01"><span class="prompt">~/projects/backend</span> <span class="cmd-text">$ bb status</span></div>
+          <div class="tl t02 section-head">Your Open Pull Requests</div>
+          <div class="tl t03 tbl-head"><span class="col-id">#&nbsp;&nbsp;</span><span class="col-repo">REPO&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="col-title">TITLE&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span>APPROVALS</span></div>
+          <div class="tl t04"><span class="col-id teal">89&nbsp;</span><span class="col-repo dim">backend&nbsp;&nbsp;&nbsp;</span><span class="col-title">Auth middleware refactor&nbsp;&nbsp;</span><span class="green">2</span></div>
+          <div class="tl t05"><span class="col-id teal">76&nbsp;</span><span class="col-repo dim">frontend&nbsp;&nbsp;</span><span class="col-title">Dark mode toggle&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="yellow">1</span></div>
+          <div class="tl t06 spacer">&nbsp;</div>
+          <div class="tl t07 section-head">Awaiting Your Review</div>
+          <div class="tl t08 tbl-head"><span class="col-id">#&nbsp;&nbsp;</span><span class="col-repo">REPO&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="col-title">TITLE&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span>AUTHOR</span></div>
+          <div class="tl t09"><span class="col-id yellow">91&nbsp;</span><span class="col-repo dim">backend&nbsp;&nbsp;&nbsp;</span><span class="col-title">Add rate limiting&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="dim">alice</span></div>
+          <div class="tl t10 spacer">&nbsp;</div>
+          <div class="tl t11 dim">2 open PR(s), 1 awaiting review (8 repos scanned)</div>
+          <div class="tl t12 spacer">&nbsp;</div>
+          <div class="tl t13"><span class="prompt">~/projects/backend</span> <span class="cmd-text">$ bb branch tidy</span></div>
+          <div class="tl t14 spacer">&nbsp;</div>
+          <div class="tl t15 dim">Merged:</div>
+          <div class="tl t16">&nbsp;&nbsp;<span class="teal">feat/oauth-refactor</span> &nbsp;<span class="dim">(PR #82)</span></div>
+          <div class="tl t17">&nbsp;&nbsp;<span class="teal">fix/login-validation</span>&nbsp;<span class="dim">(PR #79)</span></div>
+          <div class="tl t18 spacer">&nbsp;</div>
+          <div class="tl t19 dim">Delete 2 local branch(es)?&nbsp;<span class="blue-bright">Yes</span></div>
+          <div class="tl t20">&nbsp;&nbsp;<span class="green">&#x2713;</span> Deleted feat/oauth-refactor</div>
+          <div class="tl t21">&nbsp;&nbsp;<span class="green">&#x2713;</span> Deleted fix/login-validation</div>
+          <div class="tl t22 spacer">&nbsp;</div>
+          <div class="tl t23"><span class="prompt">~/projects/backend</span>&nbsp;<span class="cursor">&#x2588;</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════════════ SHOWCASE ════════════════════════════ -->
+<section class="showcase" id="commands-preview">
+  <div class="container">
+    <p class="section-label">What bb can do</p>
+    <h2 class="section-title">Every Bitbucket workflow,<br>from your terminal.</h2>
+
+    <div class="cards-grid">
+
+      <div class="card card-wide">
+        <div class="card-label">Pull Requests</div>
+        <div class="card-desc">Create PRs with auto-generated descriptions from commit history and optional PR templates. Edit after creation with an interactive form or flags.</div>
+        <div class="card-code">
+          <div class="code-line"><span class="sym">$</span> <span class="kw">bb pr create</span></div>
+          <div class="code-line out"><span class="dim">&#x2713; Template: .bitbucket/PULL_REQUEST_TEMPLATE.md</span></div>
+          <div class="code-line out"><span class="dim">&#x2713; Jira: PROJ-456 detected on branch</span></div>
+          <div class="code-line out"><span class="green">&#x2713; Created PR #89: Auth middleware refactor</span></div>
+          <div class="code-line out"><span class="dim">  https://bitbucket.org/myteam/backend/pull-requests/89</span></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-label">Pipelines</div>
+        <div class="card-desc">Watch live log output and get a native desktop notification when the build finishes.</div>
+        <div class="card-code">
+          <div class="code-line"><span class="sym">$</span> <span class="kw">bb pipeline watch</span> <span class="flag">--notify</span></div>
+          <div class="code-line out"><span class="dim">Pipeline #142 started</span></div>
+          <div class="code-line out"><span class="green">[step 2/3] Run tests &#x2713;</span></div>
+          <div class="code-line out"><span class="green">[step 3/3] Build &amp; push &#x2713;</span></div>
+          <div class="code-line out"><span class="green">SUCCESSFUL (2m 14s) &#x1F514;</span></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-label">Status Dashboard</div>
+        <div class="card-desc">Your morning standup, without opening a browser.</div>
+        <div class="card-code">
+          <div class="code-line"><span class="sym">$</span> <span class="kw">bb status</span></div>
+          <div class="code-line out"><span class="section-h">Your Open Pull Requests</span></div>
+          <div class="code-line out"><span class="teal">89</span> <span class="dim">backend &nbsp;Auth middleware </span><span class="green">2&#x2713;</span></div>
+          <div class="code-line out"><span class="section-h">Awaiting Your Review</span></div>
+          <div class="code-line out"><span class="yellow">91</span> <span class="dim">backend &nbsp;Rate limiting (alice)</span></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-label">Branch Tidy</div>
+        <div class="card-desc">Delete local branches whose PRs are merged or declined. Never clean up by hand again.</div>
+        <div class="card-code">
+          <div class="code-line"><span class="sym">$</span> <span class="kw">bb branch tidy</span> <span class="flag">--dry-run</span></div>
+          <div class="code-line out"><span class="dim">Merged:</span></div>
+          <div class="code-line out">&nbsp;&nbsp;<span class="teal">feat/oauth-refactor</span> <span class="dim">PR #82</span></div>
+          <div class="code-line out">&nbsp;&nbsp;<span class="teal">fix/login-validation</span> <span class="dim">PR #79</span></div>
+          <div class="code-line out"><span class="dim">Would delete 2 branch(es).</span></div>
+        </div>
+      </div>
+
+      <div class="card card-wide">
+        <div class="card-label">Raw API</div>
+        <div class="card-desc">Authenticated access to any Bitbucket endpoint. Pagination, jq filtering, nested field construction. The ultimate escape hatch for anything not yet in bb.</div>
+        <div class="card-code">
+          <div class="code-line"><span class="sym">$</span> <span class="kw">bb api</span> <span class="str">/repositories/{workspace}</span> <span class="flag">--paginate</span> <span class="flag">--jq</span> <span class="str">'.[].full_name'</span></div>
+          <div class="code-line out"><span class="dim">"myteam/backend"</span></div>
+          <div class="code-line out"><span class="dim">"myteam/frontend"</span></div>
+          <div class="code-line out"><span class="dim">"myteam/shared-lib"</span></div>
+          <div class="code-line"><span class="sym">$</span> <span class="kw">bb api</span> <span class="str">/user</span> <span class="flag">--jq</span> <span class="str">'.username'</span></div>
+          <div class="code-line out"><span class="dim">"rc"</span></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-label">Batch Operations</div>
+        <div class="card-desc">Run any command across every repo in a workspace with configurable concurrency.</div>
+        <div class="card-code">
+          <div class="code-line"><span class="sym">$</span> <span class="kw">bb batch</span> <span class="flag">--repos</span> <span class="str">"backend-*"</span> <span class="dim">--</span></div>
+          <div class="code-line">&nbsp;&nbsp;&nbsp;&nbsp;<span class="kw">pipeline list</span> <span class="flag">--limit</span> <span class="str">3</span></div>
+          <div class="code-line out"><span class="dim">&#x2500;&#x2500; myteam/backend-api &#x2500;&#x2500;&#x2500;&#x2500;</span></div>
+          <div class="code-line out"><span class="green">#141</span> <span class="dim">SUCCESSFUL &nbsp;main &nbsp;2m</span></div>
+          <div class="code-line out"><span class="dim">&#x2500;&#x2500; myteam/backend-auth &#x2500;&#x2500;&#x2500;</span></div>
+          <div class="code-line out"><span class="green">#98 &nbsp;</span> <span class="dim">SUCCESSFUL &nbsp;main &nbsp;1m</span></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════════════ FEATURES ════════════════════════════ -->
+<section class="features">
+  <div class="container">
+    <div class="features-grid">
+
+      <div class="feature">
+        <div class="feature-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+        </div>
+        <h3>No context switching</h3>
+        <p>Review PRs, watch pipelines, file issues, manage repos &mdash; all from the terminal. Stay in the flow.</p>
+      </div>
+
+      <div class="feature">
+        <div class="feature-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"/></svg>
+        </div>
+        <h3>First-class scripting</h3>
+        <p>Every command supports <code>--json</code> and <code>--jq</code>. <code>bb api</code> reaches any endpoint. Pipe into anything.</p>
+      </div>
+
+      <div class="feature">
+        <div class="feature-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>
+        </div>
+        <h3>Desktop notifications</h3>
+        <p>Run <code>bb pipeline watch --notify</code>, switch tasks, and get pinged when the build finishes.</p>
+      </div>
+
+      <div class="feature">
+        <div class="feature-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"/></svg>
+        </div>
+        <h3>Interactive &amp; headless</h3>
+        <p>Smart pickers and forms in TTY. Strict <code>--no-tty</code> mode for CI/CD. Works everywhere, adapts automatically.</p>
+      </div>
+
+      <div class="feature">
+        <div class="feature-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+        </div>
+        <h3>Tab completion</h3>
+        <p>PR numbers, branch names, and repo slugs complete live from the API. Bash, zsh, fish, PowerShell.</p>
+      </div>
+
+      <div class="feature">
+        <div class="feature-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"/></svg>
+        </div>
+        <h3>Extensible</h3>
+        <p>Install community plugins with <code>bb extension install</code>. Any git repo with an executable becomes a command.</p>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════════════ CMD REF ════════════════════════════ -->
+<section class="cmd-ref" id="reference">
+  <div class="container">
+    <p class="section-label">Reference</p>
+    <h2 class="section-title">All commands</h2>
+    <div class="cmd-groups">
+
+      <details class="cmd-group" open>
+        <summary><span class="grp-name">auth</span><span class="grp-count">4 commands</span></summary>
+        <table class="cmd-table">
+          <tr><td><code>bb auth login</code></td><td>Log in via browser OAuth or <code>--with-token</code></td></tr>
+          <tr><td><code>bb auth logout</code></td><td>Remove stored credentials</td></tr>
+          <tr><td><code>bb auth status</code></td><td>Show authentication state and token info</td></tr>
+          <tr><td><code>bb auth token</code></td><td>Print active access token to stdout</td></tr>
+        </table>
+      </details>
+
+      <details class="cmd-group">
+        <summary><span class="grp-name">workspace</span><span class="grp-count">3 commands</span></summary>
+        <table class="cmd-table">
+          <tr><td><code>bb workspace list</code></td><td>List accessible workspaces</td></tr>
+          <tr><td><code>bb workspace use &lt;slug&gt;</code></td><td>Set default workspace</td></tr>
+          <tr><td><code>bb workspace view [slug]</code></td><td>Show workspace details</td></tr>
+        </table>
+      </details>
+
+      <details class="cmd-group">
+        <summary><span class="grp-name">repo</span><span class="grp-count">8 commands</span></summary>
+        <table class="cmd-table">
+          <tr><td><code>bb repo list</code></td><td>List repos in the active workspace</td></tr>
+          <tr><td><code>bb repo view [workspace/repo]</code></td><td>Show repo details and clone URLs</td></tr>
+          <tr><td><code>bb repo create [name]</code></td><td>Create a repository (interactive form)</td></tr>
+          <tr><td><code>bb repo clone &lt;workspace/repo&gt;</code></td><td>Clone a repository with auth injected</td></tr>
+          <tr><td><code>bb repo fork &lt;workspace/repo&gt;</code></td><td>Fork a repository</td></tr>
+          <tr><td><code>bb repo delete &lt;workspace/repo&gt;</code></td><td>Delete a repository</td></tr>
+          <tr><td><code>bb repo rename &lt;workspace/repo&gt; &lt;new&gt;</code></td><td>Rename a repository</td></tr>
+          <tr><td><code>bb repo browse [workspace/repo]</code></td><td>Open in browser</td></tr>
+        </table>
+      </details>
+
+      <details class="cmd-group">
+        <summary><span class="grp-name">branch</span><span class="grp-count">6 commands</span></summary>
+        <table class="cmd-table">
+          <tr><td><code>bb branch list</code></td><td>List branches</td></tr>
+          <tr><td><code>bb branch create &lt;name&gt;</code></td><td>Create a branch (<code>--from</code> for source)</td></tr>
+          <tr><td><code>bb branch delete [name]</code></td><td>Delete a branch (interactive picker)</td></tr>
+          <tr><td><code>bb branch rename [old] &lt;new&gt;</code></td><td>Rename a branch</td></tr>
+          <tr><td><code>bb branch protect &lt;name&gt;</code></td><td>Enable branch restrictions</td></tr>
+          <tr><td><code>bb branch tidy</code></td><td>Delete local branches with merged/declined PRs</td></tr>
+        </table>
+      </details>
+
+      <details class="cmd-group">
+        <summary><span class="grp-name">pr</span><span class="grp-count">11 commands</span></summary>
+        <table class="cmd-table">
+          <tr><td><code>bb pr list</code></td><td>List open PRs (<code>--state</code> for MERGED/DECLINED)</td></tr>
+          <tr><td><code>bb pr view [number]</code></td><td>Show PR details</td></tr>
+          <tr><td><code>bb pr create</code></td><td>Create a PR with auto-generated description</td></tr>
+          <tr><td><code>bb pr edit [number]</code></td><td>Edit title, description, base, or reviewers</td></tr>
+          <tr><td><code>bb pr merge [number]</code></td><td>Merge a PR (<code>--strategy</code> merge_commit/squash/fast_forward)</td></tr>
+          <tr><td><code>bb pr approve [number]</code></td><td>Approve a PR</td></tr>
+          <tr><td><code>bb pr decline [number]</code></td><td>Decline a PR</td></tr>
+          <tr><td><code>bb pr checkout [number]</code></td><td>Check out PR source branch locally</td></tr>
+          <tr><td><code>bb pr comment [number]</code></td><td>Add a comment (<code>--body</code> or <code>$EDITOR</code>)</td></tr>
+          <tr><td><code>bb pr diff [number]</code></td><td>Show unified diff</td></tr>
+          <tr><td><code>bb pr browse [number]</code></td><td>Open in browser</td></tr>
+        </table>
+      </details>
+
+      <details class="cmd-group">
+        <summary><span class="grp-name">pipeline</span><span class="grp-count">5 commands</span></summary>
+        <table class="cmd-table">
+          <tr><td><code>bb pipeline list</code></td><td>List recent runs (<code>--branch</code> filter)</td></tr>
+          <tr><td><code>bb pipeline view &lt;uuid&gt;</code></td><td>Show step details and logs</td></tr>
+          <tr><td><code>bb pipeline run</code></td><td>Trigger a pipeline on current branch</td></tr>
+          <tr><td><code>bb pipeline cancel &lt;uuid&gt;</code></td><td>Cancel a running pipeline</td></tr>
+          <tr><td><code>bb pipeline watch [uuid]</code></td><td>Follow live logs; <code>--notify</code> for desktop alert</td></tr>
+        </table>
+      </details>
+
+      <details class="cmd-group">
+        <summary><span class="grp-name">issue</span><span class="grp-count">6 commands</span></summary>
+        <table class="cmd-table">
+          <tr><td><code>bb issue list</code></td><td>List issues (<code>--state</code> filter)</td></tr>
+          <tr><td><code>bb issue view &lt;number&gt;</code></td><td>Show issue details</td></tr>
+          <tr><td><code>bb issue create</code></td><td>Create an issue (interactive)</td></tr>
+          <tr><td><code>bb issue close &lt;number&gt;</code></td><td>Close an issue (<code>--status</code>)</td></tr>
+          <tr><td><code>bb issue reopen &lt;number&gt;</code></td><td>Reopen a closed issue</td></tr>
+          <tr><td><code>bb issue comment &lt;number&gt;</code></td><td>Add a comment</td></tr>
+        </table>
+      </details>
+
+      <details class="cmd-group">
+        <summary><span class="grp-name">snippet</span><span class="grp-count">6 commands</span></summary>
+        <table class="cmd-table">
+          <tr><td><code>bb snippet list</code></td><td>List your snippets</td></tr>
+          <tr><td><code>bb snippet view &lt;id&gt;</code></td><td>Show snippet metadata and files</td></tr>
+          <tr><td><code>bb snippet create</code></td><td>Create from stdin or <code>--file</code></td></tr>
+          <tr><td><code>bb snippet edit &lt;id&gt;</code></td><td>Edit in <code>$EDITOR</code></td></tr>
+          <tr><td><code>bb snippet delete &lt;id&gt;</code></td><td>Delete a snippet</td></tr>
+          <tr><td><code>bb snippet clone &lt;id&gt;</code></td><td>Clone snippet as a git repo</td></tr>
+        </table>
+      </details>
+
+      <details class="cmd-group">
+        <summary><span class="grp-name">status</span><span class="grp-count">1 command</span></summary>
+        <table class="cmd-table">
+          <tr><td><code>bb status</code></td><td>Cross-repo dashboard: your open PRs and pending reviews</td></tr>
+        </table>
+      </details>
+
+      <details class="cmd-group">
+        <summary><span class="grp-name">api</span><span class="grp-count">1 command</span></summary>
+        <table class="cmd-table">
+          <tr><td><code>bb api &lt;endpoint&gt;</code></td><td>Authenticated request to any Bitbucket API endpoint</td></tr>
+          <tr><td><code>&nbsp;&nbsp;--method, -X</code></td><td>HTTP method (default: GET or POST)</td></tr>
+          <tr><td><code>&nbsp;&nbsp;--field, -f key=val</code></td><td>Request body field (supports dot notation)</td></tr>
+          <tr><td><code>&nbsp;&nbsp;--paginate</code></td><td>Fetch all pages into one array</td></tr>
+          <tr><td><code>&nbsp;&nbsp;--jq &lt;expr&gt;</code></td><td>Filter output with a jq expression</td></tr>
+          <tr><td><code>&nbsp;&nbsp;--input &lt;file|-&gt;</code></td><td>Read request body from file or stdin</td></tr>
+        </table>
+      </details>
+
+      <details class="cmd-group">
+        <summary><span class="grp-name">batch</span><span class="grp-count">1 command</span></summary>
+        <table class="cmd-table">
+          <tr><td><code>bb batch -- &lt;command&gt;</code></td><td>Run any bb command across multiple repos</td></tr>
+          <tr><td><code>&nbsp;&nbsp;--repos &lt;glob&gt;</code></td><td>Filter repos by glob pattern</td></tr>
+          <tr><td><code>&nbsp;&nbsp;--concurrency &lt;n&gt;</code></td><td>Max parallel executions (default: 5)</td></tr>
+        </table>
+      </details>
+
+      <details class="cmd-group">
+        <summary><span class="grp-name">extension</span><span class="grp-count">3 commands</span></summary>
+        <table class="cmd-table">
+          <tr><td><code>bb extension install &lt;repo&gt;</code></td><td>Install a plugin from a git repository</td></tr>
+          <tr><td><code>bb extension list</code></td><td>List installed extensions</td></tr>
+          <tr><td><code>bb extension remove &lt;name&gt;</code></td><td>Remove an installed extension</td></tr>
+        </table>
+      </details>
+
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════════════ INSTALL ════════════════════════════ -->
+<section class="install-full" id="install">
+  <div class="container">
+    <p class="section-label">Installation</p>
+    <h2 class="section-title">Get bb in seconds.</h2>
+
+    <div class="install-grid">
+
+      <div class="install-card">
+        <div class="install-platform">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor" aria-hidden="true"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/></svg>
+          macOS &mdash; Homebrew
+        </div>
+        <div class="install-shell">
+          <code>brew install chandrasekar-r/tap/bb</code>
+          <button class="copy-btn" data-copy="brew install chandrasekar-r/tap/bb" aria-label="Copy to clipboard">
+            <svg class="icon-copy" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+            <svg class="icon-check" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
+          </button>
+        </div>
+      </div>
+
+      <div class="install-card">
+        <div class="install-platform">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor" aria-hidden="true"><path d="M0 3.449L9.75 2.1v9.451H0m10.949-9.602L24 0v11.4H10.949M0 12.6h9.75v9.451L0 20.699M10.949 12.749H24V24l-12.9-1.801"/></svg>
+          Windows &mdash; Scoop
+        </div>
+        <div class="install-shell">
+          <code>scoop bucket add chandrasekar-r https://github.com/chandrasekar-r/scoop-bucket</code>
+          <button class="copy-btn" data-copy="scoop bucket add chandrasekar-r https://github.com/chandrasekar-r/scoop-bucket" aria-label="Copy to clipboard">
+            <svg class="icon-copy" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+            <svg class="icon-check" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
+          </button>
+        </div>
+        <div class="install-shell">
+          <code>scoop install bb</code>
+          <button class="copy-btn" data-copy="scoop install bb" aria-label="Copy to clipboard">
+            <svg class="icon-copy" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+            <svg class="icon-check" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
+          </button>
+        </div>
+      </div>
+
+      <div class="install-card">
+        <div class="install-platform">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M9 3H5a2 2 0 00-2 2v4m6-6h10a2 2 0 012 2v4M9 3v18m0 0h10a2 2 0 002-2V9M9 21H5a2 2 0 01-2-2V9m0 0h18"/></svg>
+          Linux &mdash; Debian / Ubuntu
+        </div>
+        <div class="install-shell">
+          <code>curl -Lo /tmp/bb.deb https://github.com/chandrasekar-r/bitbucket-cli/releases/latest/download/bb_linux_amd64.deb &amp;&amp; sudo dpkg -i /tmp/bb.deb</code>
+          <button class="copy-btn" data-copy="curl -Lo /tmp/bb.deb https://github.com/chandrasekar-r/bitbucket-cli/releases/latest/download/bb_linux_amd64.deb && sudo dpkg -i /tmp/bb.deb" aria-label="Copy to clipboard">
+            <svg class="icon-copy" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+            <svg class="icon-check" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
+          </button>
+        </div>
+      </div>
+
+      <div class="install-card">
+        <div class="install-platform">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+          Universal &mdash; curl installer
+        </div>
+        <div class="install-shell">
+          <code>curl -fsSL https://raw.githubusercontent.com/chandrasekar-r/bitbucket-cli/main/scripts/install.sh | sh</code>
+          <button class="copy-btn" data-copy="curl -fsSL https://raw.githubusercontent.com/chandrasekar-r/bitbucket-cli/main/scripts/install.sh | sh" aria-label="Copy to clipboard">
+            <svg class="icon-copy" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+            <svg class="icon-check" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
+          </button>
+        </div>
+      </div>
+
+    </div>
+
+    <p class="install-note">
+      Need a different platform?
+      <a href="https://github.com/chandrasekar-r/bitbucket-cli/releases/latest" target="_blank" rel="noopener">Download binaries directly &rarr;</a>
+      for Linux arm64, rpm, macOS universal, and Windows amd64.
+    </p>
+  </div>
+</section>
+
+<!-- ════════════════════════════ FOOTER ═════════════════════════════ -->
+<footer class="footer">
+  <div class="container footer-inner">
+    <div class="footer-left">
+      <a href="#" class="nav-logo footer-logo">
+        <svg class="nav-logo-icon" viewBox="0 0 32 32" fill="none" aria-hidden="true">
+          <rect width="32" height="32" rx="8" fill="#2563EB"/>
+          <path d="M8 22L12 10H14.5L16 17.5L17.5 10H20L24 22H21.5L19.5 15L18 22H14L12.5 15L10.5 22H8Z" fill="white"/>
+        </svg>
+        <span>bb</span>
+      </a>
+      <p class="footer-tagline">Bitbucket Cloud CLI &mdash; MIT License</p>
+    </div>
+    <nav class="footer-links" aria-label="Footer navigation">
+      <a href="https://github.com/chandrasekar-r/bitbucket-cli" target="_blank" rel="noopener">GitHub</a>
+      <a href="https://github.com/chandrasekar-r/bitbucket-cli/releases" target="_blank" rel="noopener">Releases</a>
+      <a href="https://github.com/chandrasekar-r/bitbucket-cli/blob/main/CHANGELOG.md" target="_blank" rel="noopener">Changelog</a>
+      <a href="https://github.com/chandrasekar-r/bitbucket-cli/issues" target="_blank" rel="noopener">Issues</a>
+      <a href="https://github.com/chandrasekar-r/bitbucket-cli/blob/main/LICENSE" target="_blank" rel="noopener">License</a>
+    </nav>
+  </div>
+</footer>
+
+<script>
+/* Copy buttons — use CSS class toggle, no innerHTML mutation */
+document.querySelectorAll('.copy-btn').forEach(function(btn) {
+  btn.addEventListener('click', function() {
+    var text = btn.getAttribute('data-copy');
+    if (!text) { return; }
+    navigator.clipboard.writeText(text).then(function() {
+      btn.classList.add('copied');
+      setTimeout(function() { btn.classList.remove('copied'); }, 1800);
+    });
+  });
+});
+
+/* Mobile nav toggle */
+var navToggle = document.getElementById('nav-toggle');
+var navLinks  = document.getElementById('nav-links');
+navToggle.addEventListener('click', function() {
+  var isOpen = navLinks.classList.toggle('open');
+  navToggle.setAttribute('aria-expanded', String(isOpen));
+});
+
+/* Sticky nav shadow on scroll */
+var navEl = document.getElementById('nav');
+window.addEventListener('scroll', function() {
+  navEl.classList.toggle('scrolled', window.scrollY > 10);
+}, { passive: true });
+</script>
+</body>
+</html>
