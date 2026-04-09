@@ -15,8 +15,14 @@ func TestListPRsForBranch(t *testing.T) {
 		if !strings.Contains(q, `source.branch.name="feat/login"`) {
 			t.Errorf("q param missing branch filter, got: %s", q)
 		}
-		if !strings.Contains(q, `state="MERGED"`) {
-			t.Errorf("q param missing state filter, got: %s", q)
+		// State must be a separate query param (not in q): Bitbucket API only
+		// accepts state filtering via the dedicated state= param, not via q=.
+		if strings.Contains(q, "state") {
+			t.Errorf("state should not be in q param, got: %s", q)
+		}
+		stateParam := r.URL.Query().Get("state")
+		if stateParam != "MERGED" {
+			t.Errorf("expected state=MERGED query param, got %q", stateParam)
 		}
 		encodeJSON(t, w, map[string]interface{}{
 			"values": []map[string]interface{}{
@@ -54,9 +60,26 @@ func TestListPRsForBranch(t *testing.T) {
 
 func TestListPRsForBranch_NoState(t *testing.T) {
 	client, _ := newTestClient(t, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		// When state is empty, the implementation should request both MERGED and DECLINED
+		// via the dedicated state= query param so callers actually see closed PRs.
+		states := r.URL.Query()["state"]
+		hasMerged := false
+		hasDeclined := false
+		for _, s := range states {
+			if s == "MERGED" {
+				hasMerged = true
+			}
+			if s == "DECLINED" {
+				hasDeclined = true
+			}
+		}
+		if !hasMerged || !hasDeclined {
+			t.Errorf("expected state=MERGED&state=DECLINED query params, got %v", states)
+		}
+		// State must NOT appear in the q filter
 		q := r.URL.Query().Get("q")
 		if strings.Contains(q, "state") {
-			t.Errorf("expected no state filter when state is empty, got: %s", q)
+			t.Errorf("state must not appear in q param, got: %s", q)
 		}
 		encodeJSON(t, w, map[string]interface{}{
 			"values":  []map[string]interface{}{},

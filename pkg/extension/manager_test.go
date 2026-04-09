@@ -61,9 +61,21 @@ func TestInstalled_FindsExtension(t *testing.T) {
 	}
 }
 
-func TestRemove_NoErrorOnMissing(t *testing.T) {
+func TestRemove_ErrorOnMissing(t *testing.T) {
 	t.Setenv("XDG_CONFIG_HOME", t.TempDir())
-	if err := Remove("nonexistent"); err != nil {
-		t.Errorf("Remove() error = %v, want nil", err)
+	// Remove should return a clear error when the extension is not installed,
+	// so users know their command had no effect rather than silently succeeding.
+	err := Remove("nonexistent")
+	if err == nil {
+		t.Error("Remove() should return error for non-installed extension, got nil")
+	}
+}
+
+func TestRemove_RejectsPathTraversal(t *testing.T) {
+	t.Setenv("XDG_CONFIG_HOME", t.TempDir())
+	for _, bad := range []string{"../../etc", "../secret", "a/b", `a\b`} {
+		if err := Remove(bad); err == nil {
+			t.Errorf("Remove(%q) should return error for path-traversal name, got nil", bad)
+		}
 	}
 }

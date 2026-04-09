@@ -93,9 +93,12 @@ func newCmdCreate(f *cmdutil.Factory) *cobra.Command {
 
 			// Auto-link Jira ticket if branch name contains a key
 			if jiraKey := extractJiraKey(currentBranch); jiraKey != "" {
-				jiraLink := fmt.Sprintf("\n\nRelated: %s", jiraKey)
 				if !strings.Contains(body, jiraKey) {
-					body += jiraLink
+					if body == "" {
+						body = "Related: " + jiraKey
+					} else {
+						body += "\n\nRelated: " + jiraKey
+					}
 				}
 			}
 
@@ -220,10 +223,14 @@ func formatCommitsAsDescription(commits []string) string {
 	return b.String()
 }
 
+// jiraKeyRe matches a JIRA-style issue key such as PROJ-123.
+// Compiled once at package init; regexp.MustCompile in a function body would
+// recompile on every call, which is wasteful for a hot path like pr create.
+var jiraKeyRe = regexp.MustCompile(`[A-Z][A-Z0-9]+-\d+`)
+
 // extractJiraKey extracts a JIRA-style key (e.g. PROJ-123) from a branch name.
 func extractJiraKey(branch string) string {
-	re := regexp.MustCompile(`[A-Z][A-Z0-9]+-\d+`)
-	return re.FindString(branch)
+	return jiraKeyRe.FindString(branch)
 }
 
 // loadPRTemplate reads .bitbucket/PULL_REQUEST_TEMPLATE.md if it exists.

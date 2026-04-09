@@ -58,6 +58,9 @@ func resolvePRID(f *cmdutil.Factory, client *api.Client, workspace, slug string,
 	if err != nil {
 		return 0, err
 	}
-	id, _ := strconv.Atoi(selected)
+	id, err := strconv.Atoi(selected)
+	if err != nil {
+		return 0, fmt.Errorf("unexpected picker value %q: %w", selected, err)
+	}
 	return id, nil
 }

@@ -63,6 +63,8 @@ The default HTTP method is GET, or POST if --field or --input is provided.`,
 					method = "GET"
 				}
 			}
+			// HTTP method names are case-sensitive and must be uppercase (RFC 7230 §3.1.1)
+			method = strings.ToUpper(method)
 
 			httpClient, err := f.HttpClient()
 			if err != nil {
@@ -80,12 +82,17 @@ The default HTTP method is GET, or POST if --field or --input is provided.`,
 			// Build request body
 			var body io.Reader
 			if input != "" {
-				inputFile, err := os.Open(input)
-				if err != nil {
-					return fmt.Errorf("opening input file: %w", err)
+				if input == "-" {
+					// "-" is the conventional shorthand for stdin
+					body = os.Stdin
+				} else {
+					inputFile, err := os.Open(input)
+					if err != nil {
+						return fmt.Errorf("opening input file: %w", err)
+					}
+					defer inputFile.Close()
+					body = inputFile
 				}
-				defer inputFile.Close()
-				body = inputFile
 			} else if len(fields) > 0 {
 				nested := buildNestedFields(fields)
 				data, err := json.Marshal(nested)
@@ -123,12 +130,17 @@ The default HTTP method is GET, or POST if --field or --input is provided.`,
 				return fmt.Errorf("reading response: %w", err)
 			}
 
-			// Error responses: status line to stderr, body to stdout, exit 1
+			// Error responses: write status to stderr, body to stdout, then exit 1.
+			// We use os.Exit (same pattern as pipeline watch) so the Execute handler
+			// does not print a second "Error: HTTP N" line after we've already written it.
 			if resp.StatusCode >= 400 {
 				fmt.Fprintf(f.IOStreams.ErrOut, "HTTP %d\n", resp.StatusCode)
-				f.IOStreams.Out.Write(respBody)
-				fmt.Fprintln(f.IOStreams.Out)
-				return &cmdutil.FlagError{Err: fmt.Errorf("HTTP %d", resp.StatusCode)}
+				if len(respBody) > 0 {
+					f.IOStreams.Out.Write(respBody)
+					fmt.Fprintln(f.IOStreams.Out)
+				}
+				os.Exit(1)
+				return nil // unreachable
 			}
 
 			// Apply jq filter if provided

@@ -4,6 +4,7 @@ package notify
 import (
 	"os/exec"
 	"runtime"
+	"strings"
 )
 
 // Send fires a desktop notification. Best-effort: errors are silently ignored.
@@ -28,11 +29,12 @@ func buildCommand(title, message, subtitle string) (string, []string) {
 	case "linux":
 		return "notify-send", []string{title, message}
 	case "windows":
+		// Single quotes are PowerShell string delimiters; escape by doubling them.
 		ps := `[System.Reflection.Assembly]::LoadWithPartialName('System.Windows.Forms') | Out-Null; ` +
 			`$n = New-Object System.Windows.Forms.NotifyIcon; ` +
 			`$n.Icon = [System.Drawing.SystemIcons]::Information; ` +
 			`$n.Visible = $true; ` +
-			`$n.ShowBalloonTip(5000, '` + title + `', '` + message + `', 'Info')`
+			`$n.ShowBalloonTip(5000, '` + escapePS(title) + `', '` + escapePS(message) + `', 'Info')`
 		return "powershell", []string{"-Command", ps}
 	default:
 		return "", nil
@@ -49,4 +51,10 @@ func escapeAS(s string) string {
 		result = append(result, s[i])
 	}
 	return string(result)
+}
+
+// escapePS escapes single quotes for PowerShell single-quoted strings.
+// In PowerShell, a literal single quote inside '' is represented as ''.
+func escapePS(s string) string {
+	return strings.ReplaceAll(s, "'", "''")
 }

@@ -10,6 +10,11 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// statusConcurrency caps the number of simultaneous repo→PR fetch goroutines.
+// Without this, a workspace with 100+ repos would fire 100+ concurrent API calls,
+// quickly exhausting the Bitbucket rate limit of 1,000 req/hr.
+const statusConcurrency = 5
+
 // statusData holds the categorised PR data for JSON output.
 type statusData struct {
 	MyPRs     []prEntry `json:"my_prs"`
@@ -80,7 +85,7 @@ func runStatus(f *cmdutil.Factory, jsonOpts *cmdutil.JSONOptions) error {
 		return nil
 	}
 
-	// 3. Fetch open PRs concurrently across all repos
+	// 3. Fetch open PRs concurrently across all repos, bounded by a semaphore.
 	var (
 		mu        sync.Mutex
 		wg        sync.WaitGroup
@@ -88,11 +93,14 @@ func runStatus(f *cmdutil.Factory, jsonOpts *cmdutil.JSONOptions) error {
 		reviewPRs []prEntry
 		fetchErrs []error
 	)
+	sem := make(chan struct{}, statusConcurrency)
 
 	for _, repo := range repos {
 		wg.Add(1)
 		go func(repoSlug string) {
 			defer wg.Done()
+			sem <- struct{}{}
+			defer func() { <-sem }()
 			prs, ferr := client.ListPRs(workspace, repoSlug, api.ListPRsOptions{
 				State: "OPEN",
 				Limit: 0, // all open PRs
@@ -184,10 +192,8 @@ func runStatus(f *cmdutil.Factory, jsonOpts *cmdutil.JSONOptions) error {
 		}
 	}
 
-	total := len(myPRs) + len(reviewPRs)
-	fmt.Fprintf(f.IOStreams.ErrOut, "\n%d open PR(s), %d awaiting review (%d repos scanned)\n",
+	fmt.Fprintf(f.IOStreams.Out, "\n%d open PR(s), %d awaiting review (%d repos scanned)\n",
 		len(myPRs), len(reviewPRs), len(repos))
-	_ = total
 
 	return nil
 }

@@ -110,14 +110,20 @@ func (c *Client) ListPRs(workspace, slug string, opts ListPRsOptions) ([]PullReq
 }
 
 // ListPRsForBranch returns PRs that have the given branch as source.
-// state filters by PR state; empty string means all states.
+// state filters by PR state; empty string means MERGED and DECLINED (all terminal states).
 func (c *Client) ListPRsForBranch(workspace, slug, branch, state string) ([]PullRequest, error) {
 	q := fmt.Sprintf(`source.branch.name="%s"`, branch)
-	if state != "" {
-		q += fmt.Sprintf(` AND state="%s"`, state)
-	}
 	path := fmt.Sprintf("/repositories/%s/%s/pullrequests?q=%s&pagelen=50",
 		workspace, slug, url.QueryEscape(q))
+	if state != "" {
+		// Bitbucket accepts state as a separate query param, not in the q filter
+		path += "&state=" + url.QueryEscape(state)
+	} else {
+		// Default: fetch terminal states so callers can find merged/declined branches.
+		// The Bitbucket API defaults to OPEN when no state param is present, which
+		// would make tidy and similar commands never find closed branches.
+		path += "&state=MERGED&state=DECLINED"
+	}
 	items, err := PaginateAll(c, path, 0)
 	if err != nil {
 		return nil, fmt.Errorf("listing PRs for branch %q: %w", branch, err)

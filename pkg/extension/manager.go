@@ -72,10 +72,14 @@ func Install(repo string) (Extension, error) {
 		return Extension{}, fmt.Errorf("cloning %s: %w", repo, err)
 	}
 
+	// Try to find the extension binary: prefer <name>/<name>, then <name>/<name-without-bb-prefix>.
 	binPath := filepath.Join(destDir, name)
 	if _, err := os.Stat(binPath); os.IsNotExist(err) {
+		// Fallback: try the name with the "bb-" prefix stripped (e.g. "ext-jira" inside "bb-ext-jira/")
 		trimmed := strings.TrimPrefix(name, "bb-")
-		binPath = filepath.Join(destDir, "bb-"+trimmed)
+		if trimmed != name {
+			binPath = filepath.Join(destDir, trimmed)
+		}
 	}
 
 	return Extension{Name: strings.TrimPrefix(name, "bb-"), Path: binPath}, nil
@@ -83,9 +87,16 @@ func Install(repo string) (Extension, error) {
 
 // Remove deletes an installed extension.
 func Remove(name string) error {
+	// Guard against path traversal: names must not contain separators or dot sequences.
+	if strings.ContainsAny(name, "/\\") || name == ".." || strings.Contains(name, "..") {
+		return fmt.Errorf("invalid extension name %q", name)
+	}
 	dir := filepath.Join(ExtDir(), "bb-"+name)
 	if _, err := os.Stat(dir); os.IsNotExist(err) {
 		dir = filepath.Join(ExtDir(), name)
+	}
+	if _, err := os.Stat(dir); os.IsNotExist(err) {
+		return fmt.Errorf("extension %q is not installed", name)
 	}
 	return os.RemoveAll(dir)
 }
