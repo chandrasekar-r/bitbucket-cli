@@ -14,19 +14,29 @@ func newCmdRename(f *cmdutil.Factory) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "rename <old-name> <new-name>",
 		Short: "Rename a branch (create new + delete old)",
-		Args:  cobra.ExactArgs(2),
+		Args:  cobra.RangeArgs(1, 2),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			oldName, newName := args[0], args[1]
 			workspace, slug, err := resolveRepoBranch(f)
 			if err != nil {
 				return err
 			}
-
 			httpClient, err := f.HttpClient()
 			if err != nil {
 				return err
 			}
 			client := api.New(httpClient, f.BaseURL)
+
+			var oldName, newName string
+			if len(args) == 2 {
+				oldName, newName = args[0], args[1]
+			} else {
+				// One arg provided: pick old name interactively, arg is the new name
+				newName = args[0]
+				oldName, err = resolveBranchName(f, client, workspace, slug, nil)
+				if err != nil {
+					return err
+				}
+			}
 
 			// Get source commit hash
 			old, err := client.GetBranch(workspace, slug, oldName)

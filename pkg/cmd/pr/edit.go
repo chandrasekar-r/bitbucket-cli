@@ -20,12 +20,8 @@ func newCmdEdit(f *cmdutil.Factory) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "edit <number>",
 		Short: "Edit a pull request",
-		Args:  cobra.ExactArgs(1),
+		Args:  cobra.MaximumNArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			id, err := parsePRID(args[0])
-			if err != nil {
-				return err
-			}
 			workspace, slug, err := repoContext(f)
 			if err != nil {
 				return err
@@ -35,6 +31,10 @@ func newCmdEdit(f *cmdutil.Factory) *cobra.Command {
 				return err
 			}
 			client := api.New(httpClient, f.BaseURL)
+			id, err := resolvePRID(f, client, workspace, slug, args)
+			if err != nil {
+				return err
+			}
 
 			hasFlags := cmd.Flags().Changed("title") ||
 				cmd.Flags().Changed("body") ||

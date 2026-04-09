@@ -13,12 +13,8 @@ func newCmdDiff(f *cmdutil.Factory) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "diff <number>",
 		Short: "Show the pull request diff",
-		Args:  cobra.ExactArgs(1),
+		Args:  cobra.MaximumNArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			id, err := parsePRID(args[0])
-			if err != nil {
-				return err
-			}
 			workspace, slug, err := repoContext(f)
 			if err != nil {
 				return err
@@ -28,6 +24,10 @@ func newCmdDiff(f *cmdutil.Factory) *cobra.Command {
 				return err
 			}
 			client := api.New(httpClient, f.BaseURL)
+			id, err := resolvePRID(f, client, workspace, slug, args)
+			if err != nil {
+				return err
+			}
 			diff, err := client.GetPRDiff(workspace, slug, id)
 			if err != nil {
 				return fmt.Errorf("getting diff: %w", err)
@@ -44,12 +44,8 @@ func newCmdBrowse(f *cmdutil.Factory) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "browse <number>",
 		Short: "Open pull request in the browser",
-		Args:  cobra.ExactArgs(1),
+		Args:  cobra.MaximumNArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			id, err := parsePRID(args[0])
-			if err != nil {
-				return err
-			}
 			workspace, slug, err := repoContext(f)
 			if err != nil {
 				return err
@@ -59,6 +55,10 @@ func newCmdBrowse(f *cmdutil.Factory) *cobra.Command {
 				return err
 			}
 			client := api.New(httpClient, f.BaseURL)
+			id, err := resolvePRID(f, client, workspace, slug, args)
+			if err != nil {
+				return err
+			}
 			pr, err := client.GetPR(workspace, slug, id)
 			if err != nil {
 				return err

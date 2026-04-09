@@ -19,9 +19,18 @@ func newCmdComment(f *cmdutil.Factory) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "comment <number>",
 		Short: "Add a comment to a pull request",
-		Args:  cobra.ExactArgs(1),
+		Args:  cobra.MaximumNArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			id, err := parsePRID(args[0])
+			workspace, slug, err := repoContext(f)
+			if err != nil {
+				return err
+			}
+			httpClient, err := f.HttpClient()
+			if err != nil {
+				return err
+			}
+			client := api.New(httpClient, f.BaseURL)
+			id, err := resolvePRID(f, client, workspace, slug, args)
 			if err != nil {
 				return err
 			}
@@ -42,15 +51,6 @@ func newCmdComment(f *cmdutil.Factory) *cobra.Command {
 				return errors.New("comment body cannot be empty")
 			}
 
-			workspace, slug, err := repoContext(f)
-			if err != nil {
-				return err
-			}
-			httpClient, err := f.HttpClient()
-			if err != nil {
-				return err
-			}
-			client := api.New(httpClient, f.BaseURL)
 			if err := client.AddPRComment(workspace, slug, id, body); err != nil {
 				return fmt.Errorf("adding comment: %w", err)
 			}

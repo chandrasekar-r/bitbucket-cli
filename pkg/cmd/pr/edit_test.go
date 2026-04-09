@@ -4,12 +4,11 @@ import (
 	"testing"
 )
 
-func TestNewCmdEdit_RequiresArg(t *testing.T) {
+func TestNewCmdEdit_AcceptsZeroArgs(t *testing.T) {
 	cmd := newCmdEdit(nil)
-	cmd.SetArgs([]string{})
-	err := cmd.Execute()
-	if err == nil {
-		t.Fatal("expected error when no args provided")
+	// 0 args is valid now (interactive picker); only check cobra arg validation
+	if err := cmd.Args(cmd, []string{}); err != nil {
+		t.Errorf("expected 0 args to be accepted for interactive mode: %v", err)
 	}
 }
 
