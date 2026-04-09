@@ -9,6 +9,7 @@ import (
 	"github.com/chandrasekar-r/bitbucket-cli/pkg/api"
 	bbauth "github.com/chandrasekar-r/bitbucket-cli/pkg/auth"
 	apicmd "github.com/chandrasekar-r/bitbucket-cli/pkg/cmd/api"
+	batchcmd "github.com/chandrasekar-r/bitbucket-cli/pkg/cmd/batch"
 	"github.com/chandrasekar-r/bitbucket-cli/pkg/cmd/completion"
 	authcmd "github.com/chandrasekar-r/bitbucket-cli/pkg/cmd/auth"
 	branchcmd "github.com/chandrasekar-r/bitbucket-cli/pkg/cmd/branch"
@@ -164,6 +165,7 @@ Start with: bb auth login`,
 
 	// Register all subcommand groups
 	cmd.AddCommand(apicmd.NewCmdAPI(f))
+	cmd.AddCommand(batchcmd.NewCmdBatch(f))
 	cmd.AddCommand(authcmd.NewCmdAuth(f))
 	cmd.AddCommand(workspacecmd.NewCmdWorkspace(f))
 	cmd.AddCommand(repocmd.NewCmdRepo(f))
