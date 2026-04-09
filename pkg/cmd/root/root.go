@@ -12,6 +12,7 @@ import (
 	"github.com/chandrasekar-r/bitbucket-cli/pkg/cmd/completion"
 	authcmd "github.com/chandrasekar-r/bitbucket-cli/pkg/cmd/auth"
 	branchcmd "github.com/chandrasekar-r/bitbucket-cli/pkg/cmd/branch"
+	extcmd "github.com/chandrasekar-r/bitbucket-cli/pkg/cmd/extension"
 	issuecmd "github.com/chandrasekar-r/bitbucket-cli/pkg/cmd/issue"
 	pipelinecmd "github.com/chandrasekar-r/bitbucket-cli/pkg/cmd/pipeline"
 	prcmd "github.com/chandrasekar-r/bitbucket-cli/pkg/cmd/pr"
@@ -22,6 +23,7 @@ import (
 	workspacecmd "github.com/chandrasekar-r/bitbucket-cli/pkg/cmd/workspace"
 	"github.com/chandrasekar-r/bitbucket-cli/pkg/cmdutil"
 	"github.com/chandrasekar-r/bitbucket-cli/pkg/config"
+	"github.com/chandrasekar-r/bitbucket-cli/pkg/extension"
 	"github.com/chandrasekar-r/bitbucket-cli/pkg/gitcontext"
 	"github.com/chandrasekar-r/bitbucket-cli/pkg/iostreams"
 	"github.com/spf13/cobra"
@@ -173,6 +175,21 @@ Start with: bb auth login`,
 	cmd.AddCommand(statuscmd.NewCmdStatus(f))
 	cmd.AddCommand(versioncmd.NewCmdVersion(f))
 	cmd.AddCommand(completion.NewCmdCompletion(f))
+	cmd.AddCommand(extcmd.NewCmdExtension(f))
+
+	// Load installed extensions as top-level commands
+	exts, _ := extension.Installed()
+	for _, e := range exts {
+		ext := e // capture loop var
+		cmd.AddCommand(&cobra.Command{
+			Use:                ext.Name,
+			Short:              fmt.Sprintf("[extension] %s", ext.Name),
+			DisableFlagParsing: true,
+			RunE: func(cmd *cobra.Command, args []string) error {
+				return ext.Run(args)
+			},
+		})
+	}
 
 	return cmd, f
 }
