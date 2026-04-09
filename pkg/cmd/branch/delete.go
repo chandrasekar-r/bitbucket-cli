@@ -58,5 +58,6 @@ func newCmdDelete(f *cmdutil.Factory) *cobra.Command {
 	}
 
 	cmd.Flags().BoolVar(&force, "force", false, "Skip confirmation (required in --no-tty mode)")
+	cmd.ValidArgsFunction = cmdutil.CompleteBranchNames(f)
 	return cmd
 }

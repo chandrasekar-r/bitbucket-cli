@@ -60,6 +60,7 @@ func newCmdComment(f *cmdutil.Factory) *cobra.Command {
 	}
 
 	cmd.Flags().StringVar(&body, "body", "", "Comment text")
+	cmd.ValidArgsFunction = cmdutil.CompletePRIDs(f, "OPEN")
 	return cmd
 }
 

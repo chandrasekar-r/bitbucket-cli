@@ -55,5 +55,6 @@ func newCmdCheckout(f *cmdutil.Factory) *cobra.Command {
 			return nil
 		},
 	}
+	cmd.ValidArgsFunction = cmdutil.CompletePRIDs(f, "OPEN")
 	return cmd
 }

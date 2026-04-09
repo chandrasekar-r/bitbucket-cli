@@ -48,5 +48,6 @@ func newCmdRename(f *cmdutil.Factory) *cobra.Command {
 			return nil
 		},
 	}
+	cmd.ValidArgsFunction = cmdutil.CompleteBranchNames(f)
 	return cmd
 }

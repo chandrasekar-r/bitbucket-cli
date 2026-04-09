@@ -97,6 +97,7 @@ func newCmdEdit(f *cmdutil.Factory) *cobra.Command {
 	cmd.Flags().StringVar(&body, "body", "", "New description for the pull request")
 	cmd.Flags().StringVar(&base, "base", "", "New target branch")
 	cmd.Flags().StringArrayVar(&addReviewers, "add-reviewer", nil, "Add reviewer (can be specified multiple times)")
+	cmd.ValidArgsFunction = cmdutil.CompletePRIDs(f, "OPEN")
 	return cmd
 }
 

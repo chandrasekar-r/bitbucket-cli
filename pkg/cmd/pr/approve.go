@@ -34,6 +34,7 @@ func newCmdApprove(f *cmdutil.Factory) *cobra.Command {
 			return nil
 		},
 	}
+	cmd.ValidArgsFunction = cmdutil.CompletePRIDs(f, "OPEN")
 	return cmd
 }
 
@@ -64,5 +65,6 @@ func newCmdDecline(f *cmdutil.Factory) *cobra.Command {
 			return nil
 		},
 	}
+	cmd.ValidArgsFunction = cmdutil.CompletePRIDs(f, "OPEN")
 	return cmd
 }

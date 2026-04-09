@@ -36,6 +36,7 @@ func newCmdDiff(f *cmdutil.Factory) *cobra.Command {
 			return nil
 		},
 	}
+	cmd.ValidArgsFunction = cmdutil.CompletePRIDs(f, "OPEN")
 	return cmd
 }
 
@@ -71,6 +72,7 @@ func newCmdBrowse(f *cmdutil.Factory) *cobra.Command {
 			return browser.Open(prURL)
 		},
 	}
+	cmd.ValidArgsFunction = cmdutil.CompletePRIDs(f, "OPEN")
 	return cmd
 }
 

@@ -87,5 +87,6 @@ func newCmdMerge(f *cmdutil.Factory) *cobra.Command {
 		"Merge strategy: merge_commit, squash, fast_forward (interactive when omitted)")
 	cmd.Flags().BoolVar(&force, "force", false, "Skip confirmation")
 	cmd.Flags().StringVar(&message, "message", "", "Custom merge commit message")
+	cmd.ValidArgsFunction = cmdutil.CompletePRIDs(f, "OPEN")
 	return cmd
 }

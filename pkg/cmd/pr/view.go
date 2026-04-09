@@ -60,5 +60,6 @@ func newCmdView(f *cmdutil.Factory) *cobra.Command {
 	}
 
 	jsonOpts = cmdutil.AddJSONFlags(cmd)
+	cmd.ValidArgsFunction = cmdutil.CompletePRIDs(f, "OPEN")
 	return cmd
 }
