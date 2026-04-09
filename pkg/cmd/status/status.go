@@ -71,10 +71,12 @@ func runStatus(f *cmdutil.Factory, jsonOpts *cmdutil.JSONOptions) error {
 		return fmt.Errorf("fetching current user: %w", err)
 	}
 
-	// 2. List repos the user contributes to
+	// 2. List repos the user contributes to (cap at 50 to avoid rate-limit hammering
+	// on large workspaces; status is a quick at-a-glance view, not an audit).
+	fmt.Fprintf(f.IOStreams.ErrOut, "Scanning workspace %s...\n", workspace)
 	repos, err := client.ListRepos(workspace, api.ListReposOptions{
 		Role:  "contributor",
-		Limit: 0, // all
+		Limit: 50,
 	})
 	if err != nil {
 		return fmt.Errorf("listing repos: %w", err)
