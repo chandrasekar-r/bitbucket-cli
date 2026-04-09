@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"net/url"
 )
 
 // PullRequest represents a Bitbucket Cloud pull request.
@@ -97,6 +98,29 @@ func (c *Client) ListPRs(workspace, slug string, opts ListPRsOptions) ([]PullReq
 	items, err := PaginateAll(c, path, opts.Limit)
 	if err != nil {
 		return nil, fmt.Errorf("listing PRs: %w", err)
+	}
+	prs := make([]PullRequest, 0, len(items))
+	for _, raw := range items {
+		var pr PullRequest
+		if err := json.Unmarshal(raw, &pr); err == nil {
+			prs = append(prs, pr)
+		}
+	}
+	return prs, nil
+}
+
+// ListPRsForBranch returns PRs that have the given branch as source.
+// state filters by PR state; empty string means all states.
+func (c *Client) ListPRsForBranch(workspace, slug, branch, state string) ([]PullRequest, error) {
+	q := fmt.Sprintf(`source.branch.name="%s"`, branch)
+	if state != "" {
+		q += fmt.Sprintf(` AND state="%s"`, state)
+	}
+	path := fmt.Sprintf("/repositories/%s/%s/pullrequests?q=%s&pagelen=50",
+		workspace, slug, url.QueryEscape(q))
+	items, err := PaginateAll(c, path, 0)
+	if err != nil {
+		return nil, fmt.Errorf("listing PRs for branch %q: %w", branch, err)
 	}
 	prs := make([]PullRequest, 0, len(items))
 	for _, raw := range items {
