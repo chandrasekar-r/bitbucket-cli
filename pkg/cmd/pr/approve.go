@@ -12,12 +12,8 @@ func newCmdApprove(f *cmdutil.Factory) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "approve <number>",
 		Short: "Approve a pull request",
-		Args:  cobra.ExactArgs(1),
+		Args:  cobra.MaximumNArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			id, err := parsePRID(args[0])
-			if err != nil {
-				return err
-			}
 			workspace, slug, err := repoContext(f)
 			if err != nil {
 				return err
@@ -27,6 +23,10 @@ func newCmdApprove(f *cmdutil.Factory) *cobra.Command {
 				return err
 			}
 			client := api.New(httpClient, f.BaseURL)
+			id, err := resolvePRID(f, client, workspace, slug, args)
+			if err != nil {
+				return err
+			}
 			if err := client.ApprovePR(workspace, slug, id); err != nil {
 				return fmt.Errorf("approving PR: %w", err)
 			}
@@ -34,6 +34,7 @@ func newCmdApprove(f *cmdutil.Factory) *cobra.Command {
 			return nil
 		},
 	}
+	cmd.ValidArgsFunction = cmdutil.CompletePRIDs(f, "OPEN")
 	return cmd
 }
 
@@ -41,12 +42,8 @@ func newCmdDecline(f *cmdutil.Factory) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "decline <number>",
 		Short: "Decline a pull request",
-		Args:  cobra.ExactArgs(1),
+		Args:  cobra.MaximumNArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			id, err := parsePRID(args[0])
-			if err != nil {
-				return err
-			}
 			workspace, slug, err := repoContext(f)
 			if err != nil {
 				return err
@@ -56,6 +53,10 @@ func newCmdDecline(f *cmdutil.Factory) *cobra.Command {
 				return err
 			}
 			client := api.New(httpClient, f.BaseURL)
+			id, err := resolvePRID(f, client, workspace, slug, args)
+			if err != nil {
+				return err
+			}
 			declined, err := client.DeclinePR(workspace, slug, id)
 			if err != nil {
 				return fmt.Errorf("declining PR: %w", err)
@@ -64,5 +65,6 @@ func newCmdDecline(f *cmdutil.Factory) *cobra.Command {
 			return nil
 		},
 	}
+	cmd.ValidArgsFunction = cmdutil.CompletePRIDs(f, "OPEN")
 	return cmd
 }

@@ -24,5 +24,6 @@ func NewCmdBranch(f *cmdutil.Factory) *cobra.Command {
 	cmd.AddCommand(newCmdDelete(f))
 	cmd.AddCommand(newCmdRename(f))
 	cmd.AddCommand(newCmdProtect(f))
+	cmd.AddCommand(newCmdTidy(f))
 	return cmd
 }

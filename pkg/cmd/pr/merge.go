@@ -17,13 +17,18 @@ func newCmdMerge(f *cmdutil.Factory) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "merge <number>",
 		Short: "Merge a pull request",
-		Args:  cobra.ExactArgs(1),
+		Args:  cobra.MaximumNArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			id, err := parsePRID(args[0])
+			workspace, slug, err := repoContext(f)
 			if err != nil {
 				return err
 			}
-			workspace, slug, err := repoContext(f)
+			httpClient, err := f.HttpClient()
+			if err != nil {
+				return err
+			}
+			client := api.New(httpClient, f.BaseURL)
+			id, err := resolvePRID(f, client, workspace, slug, args)
 			if err != nil {
 				return err
 			}
@@ -68,11 +73,6 @@ func newCmdMerge(f *cmdutil.Factory) *cobra.Command {
 				return &cmdutil.NoTTYError{Operation: fmt.Sprintf("merge PR #%d", id)}
 			}
 
-			httpClient, err := f.HttpClient()
-			if err != nil {
-				return err
-			}
-			client := api.New(httpClient, f.BaseURL)
 			merged, err := client.MergePR(workspace, slug, id, api.MergeStrategy(strategy), message)
 			if err != nil {
 				return fmt.Errorf("merging PR: %w", err)
@@ -87,5 +87,6 @@ func newCmdMerge(f *cmdutil.Factory) *cobra.Command {
 		"Merge strategy: merge_commit, squash, fast_forward (interactive when omitted)")
 	cmd.Flags().BoolVar(&force, "force", false, "Skip confirmation")
 	cmd.Flags().StringVar(&message, "message", "", "Custom merge commit message")
+	cmd.ValidArgsFunction = cmdutil.CompletePRIDs(f, "OPEN")
 	return cmd
 }

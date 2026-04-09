@@ -8,18 +8,23 @@ import (
 
 	"github.com/chandrasekar-r/bitbucket-cli/pkg/api"
 	bbauth "github.com/chandrasekar-r/bitbucket-cli/pkg/auth"
+	apicmd "github.com/chandrasekar-r/bitbucket-cli/pkg/cmd/api"
+	batchcmd "github.com/chandrasekar-r/bitbucket-cli/pkg/cmd/batch"
 	"github.com/chandrasekar-r/bitbucket-cli/pkg/cmd/completion"
 	authcmd "github.com/chandrasekar-r/bitbucket-cli/pkg/cmd/auth"
 	branchcmd "github.com/chandrasekar-r/bitbucket-cli/pkg/cmd/branch"
+	extcmd "github.com/chandrasekar-r/bitbucket-cli/pkg/cmd/extension"
 	issuecmd "github.com/chandrasekar-r/bitbucket-cli/pkg/cmd/issue"
 	pipelinecmd "github.com/chandrasekar-r/bitbucket-cli/pkg/cmd/pipeline"
 	prcmd "github.com/chandrasekar-r/bitbucket-cli/pkg/cmd/pr"
 	repocmd "github.com/chandrasekar-r/bitbucket-cli/pkg/cmd/repo"
 	snippetcmd "github.com/chandrasekar-r/bitbucket-cli/pkg/cmd/snippet"
+	statuscmd "github.com/chandrasekar-r/bitbucket-cli/pkg/cmd/status"
 	versioncmd "github.com/chandrasekar-r/bitbucket-cli/pkg/cmd/version"
 	workspacecmd "github.com/chandrasekar-r/bitbucket-cli/pkg/cmd/workspace"
 	"github.com/chandrasekar-r/bitbucket-cli/pkg/cmdutil"
 	"github.com/chandrasekar-r/bitbucket-cli/pkg/config"
+	"github.com/chandrasekar-r/bitbucket-cli/pkg/extension"
 	"github.com/chandrasekar-r/bitbucket-cli/pkg/gitcontext"
 	"github.com/chandrasekar-r/bitbucket-cli/pkg/iostreams"
 	"github.com/spf13/cobra"
@@ -159,6 +164,8 @@ Start with: bb auth login`,
 		"Disable interactive prompts; use --force on destructive operations")
 
 	// Register all subcommand groups
+	cmd.AddCommand(apicmd.NewCmdAPI(f))
+	cmd.AddCommand(batchcmd.NewCmdBatch(f))
 	cmd.AddCommand(authcmd.NewCmdAuth(f))
 	cmd.AddCommand(workspacecmd.NewCmdWorkspace(f))
 	cmd.AddCommand(repocmd.NewCmdRepo(f))
@@ -167,8 +174,24 @@ Start with: bb auth login`,
 	cmd.AddCommand(pipelinecmd.NewCmdPipeline(f))
 	cmd.AddCommand(issuecmd.NewCmdIssue(f))
 	cmd.AddCommand(snippetcmd.NewCmdSnippet(f))
+	cmd.AddCommand(statuscmd.NewCmdStatus(f))
 	cmd.AddCommand(versioncmd.NewCmdVersion(f))
 	cmd.AddCommand(completion.NewCmdCompletion(f))
+	cmd.AddCommand(extcmd.NewCmdExtension(f))
+
+	// Load installed extensions as top-level commands
+	exts, _ := extension.Installed()
+	for _, e := range exts {
+		ext := e // capture loop var
+		cmd.AddCommand(&cobra.Command{
+			Use:                ext.Name,
+			Short:              fmt.Sprintf("[extension] %s", ext.Name),
+			DisableFlagParsing: true,
+			RunE: func(cmd *cobra.Command, args []string) error {
+				return ext.Run(args)
+			},
+		})
+	}
 
 	return cmd, f
 }

@@ -15,10 +15,18 @@ func newCmdDelete(f *cmdutil.Factory) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "delete <name>",
 		Short: "Delete a branch",
-		Args:  cobra.ExactArgs(1),
+		Args:  cobra.MaximumNArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			name := args[0]
 			workspace, slug, err := resolveRepoBranch(f)
+			if err != nil {
+				return err
+			}
+			httpClient, err := f.HttpClient()
+			if err != nil {
+				return err
+			}
+			client := api.New(httpClient, f.BaseURL)
+			name, err := resolveBranchName(f, client, workspace, slug, args)
 			if err != nil {
 				return err
 			}
@@ -43,11 +51,6 @@ func newCmdDelete(f *cmdutil.Factory) *cobra.Command {
 				}
 			}
 
-			httpClient, err := f.HttpClient()
-			if err != nil {
-				return err
-			}
-			client := api.New(httpClient, f.BaseURL)
 			if err := client.DeleteBranch(workspace, slug, name); err != nil {
 				return fmt.Errorf("deleting branch: %w", err)
 			}
@@ -58,5 +61,6 @@ func newCmdDelete(f *cmdutil.Factory) *cobra.Command {
 	}
 
 	cmd.Flags().BoolVar(&force, "force", false, "Skip confirmation (required in --no-tty mode)")
+	cmd.ValidArgsFunction = cmdutil.CompleteBranchNames(f)
 	return cmd
 }

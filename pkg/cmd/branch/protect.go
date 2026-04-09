@@ -45,5 +45,6 @@ func newCmdProtect(f *cmdutil.Factory) *cobra.Command {
 	cmd.Flags().StringVar(&pattern, "pattern", "", "Branch glob pattern (default: exact branch name)")
 	cmd.Flags().StringVar(&kind, "kind", "push",
 		"Restriction type: push, delete, restrict_merges, force")
+	cmd.ValidArgsFunction = cmdutil.CompleteBranchNames(f)
 	return cmd
 }

@@ -14,12 +14,8 @@ func newCmdCheckout(f *cmdutil.Factory) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "checkout <number>",
 		Short: "Check out a PR's source branch locally",
-		Args:  cobra.ExactArgs(1),
+		Args:  cobra.MaximumNArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			id, err := parsePRID(args[0])
-			if err != nil {
-				return err
-			}
 			workspace, slug, err := repoContext(f)
 			if err != nil {
 				return err
@@ -29,6 +25,10 @@ func newCmdCheckout(f *cmdutil.Factory) *cobra.Command {
 				return err
 			}
 			client := api.New(httpClient, f.BaseURL)
+			id, err := resolvePRID(f, client, workspace, slug, args)
+			if err != nil {
+				return err
+			}
 			pr, err := client.GetPR(workspace, slug, id)
 			if err != nil {
 				return err
@@ -55,5 +55,6 @@ func newCmdCheckout(f *cmdutil.Factory) *cobra.Command {
 			return nil
 		},
 	}
+	cmd.ValidArgsFunction = cmdutil.CompletePRIDs(f, "OPEN")
 	return cmd
 }

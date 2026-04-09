@@ -7,6 +7,7 @@ import (
 
 	"github.com/chandrasekar-r/bitbucket-cli/pkg/api"
 	"github.com/chandrasekar-r/bitbucket-cli/pkg/cmdutil"
+	"github.com/chandrasekar-r/bitbucket-cli/pkg/notify"
 	"github.com/spf13/cobra"
 )
 
@@ -24,6 +25,7 @@ const exitCodeWatchError = 2
 func newCmdWatch(f *cmdutil.Factory) *cobra.Command {
 	var pollInterval int
 	var timeout int
+	var notifyOnDone bool
 
 	cmd := &cobra.Command{
 		Use:   "watch [uuid]",
@@ -78,7 +80,7 @@ with HTTP byte-range requests at the configured interval.`,
 				fmt.Fprintf(f.IOStreams.Out, "Pipeline #%d started (%s)\n\n", p.BuildNumber, pipelineUUID)
 			}
 
-			exitCode := watchPipeline(f, client, workspace, slug, pipelineUUID, pollInterval, timeout)
+			exitCode := watchPipeline(f, client, workspace, slug, pipelineUUID, pollInterval, timeout, notifyOnDone)
 			os.Exit(exitCode)
 			return nil // unreachable
 		},
@@ -88,6 +90,8 @@ with HTTP byte-range requests at the configured interval.`,
 		"Seconds between status polls (minimum 5)")
 	cmd.Flags().IntVar(&timeout, "timeout", 0,
 		"Abort watch after N minutes (0 = no timeout)")
+	cmd.Flags().BoolVar(&notifyOnDone, "notify", false,
+		"Send a desktop notification when the pipeline completes")
 	return cmd
 }
 
@@ -98,6 +102,7 @@ func watchPipeline(
 	client *api.Client,
 	workspace, slug, uuid string,
 	pollIntervalSecs, timeoutMins int,
+	notifyFlag bool,
 ) int {
 	ticker := time.NewTicker(time.Duration(pollIntervalSecs) * time.Second)
 	defer ticker.Stop()
@@ -168,6 +173,17 @@ func watchPipeline(
 					statusColor(p.State.Name, result, f.IOStreams.ColorEnabled()),
 					formatDuration(p.DurationInSeconds),
 				)
+				if notifyFlag {
+					status := "SUCCESSFUL"
+					if result != "SUCCESSFUL" {
+						status = "FAILED"
+					}
+					notify.Send(
+						fmt.Sprintf("Pipeline #%d %s", p.BuildNumber, status),
+						fmt.Sprintf("%s/%s — %s", workspace, slug, formatDuration(p.DurationInSeconds)),
+						"",
+					)
+				}
 				if result == "SUCCESSFUL" {
 					return exitCodeSuccess
 				}

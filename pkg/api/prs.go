@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"net/url"
 )
 
 // PullRequest represents a Bitbucket Cloud pull request.
@@ -108,6 +109,35 @@ func (c *Client) ListPRs(workspace, slug string, opts ListPRsOptions) ([]PullReq
 	return prs, nil
 }
 
+// ListPRsForBranch returns PRs that have the given branch as source.
+// state filters by PR state; empty string means MERGED and DECLINED (all terminal states).
+func (c *Client) ListPRsForBranch(workspace, slug, branch, state string) ([]PullRequest, error) {
+	q := fmt.Sprintf(`source.branch.name="%s"`, branch)
+	path := fmt.Sprintf("/repositories/%s/%s/pullrequests?q=%s&pagelen=50",
+		workspace, slug, url.QueryEscape(q))
+	if state != "" {
+		// Bitbucket accepts state as a separate query param, not in the q filter
+		path += "&state=" + url.QueryEscape(state)
+	} else {
+		// Default: fetch terminal states so callers can find merged/declined branches.
+		// The Bitbucket API defaults to OPEN when no state param is present, which
+		// would make tidy and similar commands never find closed branches.
+		path += "&state=MERGED&state=DECLINED"
+	}
+	items, err := PaginateAll(c, path, 0)
+	if err != nil {
+		return nil, fmt.Errorf("listing PRs for branch %q: %w", branch, err)
+	}
+	prs := make([]PullRequest, 0, len(items))
+	for _, raw := range items {
+		var pr PullRequest
+		if err := json.Unmarshal(raw, &pr); err == nil {
+			prs = append(prs, pr)
+		}
+	}
+	return prs, nil
+}
+
 // GetPR fetches a single pull request by ID.
 func (c *Client) GetPR(workspace, slug string, id int) (*PullRequest, error) {
 	var pr PullRequest
@@ -191,6 +221,49 @@ func (c *Client) DeclinePR(workspace, slug string, id int) (*PullRequest, error)
 	path := fmt.Sprintf("/repositories/%s/%s/pullrequests/%d/decline", workspace, slug, id)
 	if err := c.Post(path, nil, &pr); err != nil {
 		return nil, fmt.Errorf("declining PR #%d: %w", id, err)
+	}
+	return &pr, nil
+}
+
+// UpdatePROptions holds optional fields for updating a pull request.
+// Nil pointer fields are omitted from the request (not changed).
+type UpdatePROptions struct {
+	Title             *string
+	Description       *string
+	DestBranch        *string
+	ReviewerUsernames []string // replaces all reviewers; nil = don't change
+	CloseSourceBranch *bool
+}
+
+// UpdatePR modifies an existing pull request.
+func (c *Client) UpdatePR(workspace, slug string, id int, opts UpdatePROptions) (*PullRequest, error) {
+	body := map[string]interface{}{}
+	if opts.Title != nil {
+		body["title"] = *opts.Title
+	}
+	if opts.Description != nil {
+		body["description"] = *opts.Description
+	}
+	if opts.DestBranch != nil {
+		body["destination"] = map[string]interface{}{
+			"branch": map[string]string{"name": *opts.DestBranch},
+		}
+	}
+	if opts.ReviewerUsernames != nil {
+		reviewers := make([]map[string]string, len(opts.ReviewerUsernames))
+		for i, u := range opts.ReviewerUsernames {
+			reviewers[i] = map[string]string{"username": u}
+		}
+		body["reviewers"] = reviewers
+	}
+	if opts.CloseSourceBranch != nil {
+		body["close_source_branch"] = *opts.CloseSourceBranch
+	}
+
+	var pr PullRequest
+	path := fmt.Sprintf("/repositories/%s/%s/pullrequests/%d", workspace, slug, id)
+	if err := c.Put(path, body, &pr); err != nil {
+		return nil, fmt.Errorf("updating PR #%d: %w", id, err)
 	}
 	return &pr, nil
 }
