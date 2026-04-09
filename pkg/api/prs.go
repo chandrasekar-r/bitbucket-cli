@@ -195,6 +195,49 @@ func (c *Client) DeclinePR(workspace, slug string, id int) (*PullRequest, error)
 	return &pr, nil
 }
 
+// UpdatePROptions holds optional fields for updating a pull request.
+// Nil pointer fields are omitted from the request (not changed).
+type UpdatePROptions struct {
+	Title             *string
+	Description       *string
+	DestBranch        *string
+	ReviewerUsernames []string // replaces all reviewers; nil = don't change
+	CloseSourceBranch *bool
+}
+
+// UpdatePR modifies an existing pull request.
+func (c *Client) UpdatePR(workspace, slug string, id int, opts UpdatePROptions) (*PullRequest, error) {
+	body := map[string]interface{}{}
+	if opts.Title != nil {
+		body["title"] = *opts.Title
+	}
+	if opts.Description != nil {
+		body["description"] = *opts.Description
+	}
+	if opts.DestBranch != nil {
+		body["destination"] = map[string]interface{}{
+			"branch": map[string]string{"name": *opts.DestBranch},
+		}
+	}
+	if opts.ReviewerUsernames != nil {
+		reviewers := make([]map[string]string, len(opts.ReviewerUsernames))
+		for i, u := range opts.ReviewerUsernames {
+			reviewers[i] = map[string]string{"username": u}
+		}
+		body["reviewers"] = reviewers
+	}
+	if opts.CloseSourceBranch != nil {
+		body["close_source_branch"] = *opts.CloseSourceBranch
+	}
+
+	var pr PullRequest
+	path := fmt.Sprintf("/repositories/%s/%s/pullrequests/%d", workspace, slug, id)
+	if err := c.Put(path, body, &pr); err != nil {
+		return nil, fmt.Errorf("updating PR #%d: %w", id, err)
+	}
+	return &pr, nil
+}
+
 // AddPRComment adds a general comment to a pull request.
 func (c *Client) AddPRComment(workspace, slug string, id int, content string) error {
 	body := map[string]interface{}{
