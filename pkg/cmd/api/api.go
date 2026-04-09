@@ -236,8 +236,9 @@ func doPaginated(httpClient *http.Client, baseURL, path, jqExpr string, w io.Wri
 		return err
 	}
 
-	// Convert []json.RawMessage to []interface{} for PrintJSON
-	var all []interface{}
+	// Convert []json.RawMessage to []interface{} for PrintJSON.
+	// Initialise as empty slice (not nil) so zero results marshal to [] not null.
+	all := make([]interface{}, 0, len(items))
 	for _, raw := range items {
 		var v interface{}
 		if err := json.Unmarshal(raw, &v); err != nil {
