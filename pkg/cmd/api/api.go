@@ -136,7 +136,7 @@ The default HTTP method is GET, or POST if --field or --input is provided.`,
 			if resp.StatusCode >= 400 {
 				fmt.Fprintf(f.IOStreams.ErrOut, "HTTP %d\n", resp.StatusCode)
 				if len(respBody) > 0 {
-					f.IOStreams.Out.Write(respBody)
+					fmt.Fprint(f.IOStreams.Out, string(respBody))
 					fmt.Fprintln(f.IOStreams.Out)
 				}
 				os.Exit(1)
@@ -148,7 +148,7 @@ The default HTTP method is GET, or POST if --field or --input is provided.`,
 				var data any
 				if err := json.Unmarshal(respBody, &data); err != nil {
 					// Not JSON — write raw
-					f.IOStreams.Out.Write(respBody)
+					fmt.Fprint(f.IOStreams.Out, string(respBody))
 					fmt.Fprintln(f.IOStreams.Out)
 					return nil
 				}
@@ -160,7 +160,7 @@ The default HTTP method is GET, or POST if --field or --input is provided.`,
 			if json.Indent(&prettyBuf, respBody, "", "  ") == nil {
 				fmt.Fprintln(f.IOStreams.Out, prettyBuf.String())
 			} else {
-				f.IOStreams.Out.Write(respBody)
+				fmt.Fprint(f.IOStreams.Out, string(respBody))
 				fmt.Fprintln(f.IOStreams.Out)
 			}
 			return nil
