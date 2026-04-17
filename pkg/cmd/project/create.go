@@ -69,10 +69,7 @@ func newCmdCreate(f *cmdutil.Factory) *cobra.Command {
 				return errors.New("--key and --name are required")
 			}
 
-			isPrivate := true // Bitbucket default; tracked explicitly
-			if public {
-				isPrivate = false
-			}
+			isPrivate := !public
 
 			workspace, err := f.Workspace()
 			if err != nil {
