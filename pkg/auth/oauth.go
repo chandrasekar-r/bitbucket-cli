@@ -23,7 +23,7 @@ const (
 	// Scopes needed for full bb functionality
 	oauthScopes = "repository repository:write pullrequest pullrequest:write " +
 		"issue issue:write pipeline pipeline:write snippet snippet:write " +
-		"account team project"
+		"account team project project:write webhook runner runner:write"
 )
 
 // OAuthResult holds the token received after a successful OAuth flow.

@@ -201,18 +201,34 @@ func Execute() {
 	cmd, _ := NewCmdRoot()
 	if err := cmd.Execute(); err != nil {
 		fmt.Fprintf(os.Stderr, "Error: %s\n", err)
-		if hint := accountSwitchHint(err); hint != "" {
+		if hint := authHint(err, defaultListAccounts); hint != "" {
 			fmt.Fprintln(os.Stderr, hint)
 		}
 		os.Exit(1)
 	}
 }
 
-// accountSwitchHint returns a suggestion to try `bb auth switch` when the error
-// is a 403/404 from the Bitbucket API and the user has more than one stored
-// account. Returns "" when the hint doesn't apply. Any lookup failure is
-// treated as "no hint" — we never block the original error on this.
-func accountSwitchHint(err error) string {
+// listAccountsFunc returns the stored usernames (sorted) and the active one.
+// It's a seam that lets authHint be tested without touching ~/.config/bb.
+type listAccountsFunc func() (usernames []string, active string, err error)
+
+func defaultListAccounts() ([]string, string, error) {
+	return bbauth.NewTokenStore().ListAccounts()
+}
+
+// authHint returns a user-facing hint to help disambiguate 403/404 failures.
+//
+// There are two cases we recognize:
+//  1. 404 or 403 with multiple stored accounts → suggest `bb auth switch` to
+//     the other account (the active account may simply lack access to the
+//     resource).
+//  2. 403 with exactly one stored account → suggest `bb auth login`. The
+//     token is authenticated but may be missing a scope added in a later
+//     version of bb (e.g. the v0.4.0 webhook/runner/project scopes).
+//
+// Returns "" when the hint doesn't apply. Any lookup failure is treated as
+// "no hint" — we never block the original error on this.
+func authHint(err error, listAccounts listAccountsFunc) string {
 	var httpErr *api.HTTPError
 	if !errors.As(err, &httpErr) {
 		return ""
@@ -220,21 +236,27 @@ func accountSwitchHint(err error) string {
 	if httpErr.StatusCode != http.StatusForbidden && httpErr.StatusCode != http.StatusNotFound {
 		return ""
 	}
-	store := bbauth.NewTokenStore()
-	usernames, active, lerr := store.ListAccounts()
-	if lerr != nil || len(usernames) < 2 {
+	usernames, active, lerr := listAccounts()
+	if lerr != nil {
 		return ""
 	}
-	var others []string
-	for _, u := range usernames {
-		if u != active {
-			others = append(others, u)
+
+	if len(usernames) >= 2 {
+		for _, u := range usernames {
+			if u != active {
+				return fmt.Sprintf(
+					"Hint: you are signed in as %q. If another account has access, try:\n  bb auth switch %s",
+					active, u,
+				)
+			}
 		}
 	}
-	return fmt.Sprintf(
-		"Hint: you are signed in as %q. If another account has access, try:\n  bb auth switch %s",
-		active, others[0],
-	)
+
+	if httpErr.StatusCode == http.StatusForbidden && len(usernames) == 1 {
+		return "Hint: this token may be missing a required scope. Run:\n  bb auth login"
+	}
+
+	return ""
 }
 
 // bearerTransport adds an OAuth Bearer token Authorization header.
