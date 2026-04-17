@@ -4,6 +4,29 @@ All notable changes to `bb` are documented here. Dates are UTC. Versions follow 
 
 ---
 
+## [0.4.0] — 2026-04-17
+
+### New commands
+
+- **`bb webhook`** — manage repository and workspace webhooks. Supports `list`, `view`, `create`, `update`, `delete`; defaults to repo scope via git context, `--workspace-only` for workspace-level hooks. The `--event` flag is repeatable and accepts comma-separated values (`--event repo:push,pullrequest:created`).
+- **`bb runner`** — manage self-hosted Bitbucket Pipelines runners. Supports `list`, `view`, `create`, `disable`, `enable`, `delete`. Defaults to workspace scope, `--repo` for repo-level runners. `create` prints the one-time OAuth client credentials Bitbucket returns; these are shown **only once** — store them before closing the terminal.
+- **`bb project`** — manage Bitbucket workspace projects (the container that holds repositories). Supports `list`, `view`, `create`, `update`, `delete`.
+- **`bb auth switch [account]`** — switch between multiple stored Bitbucket accounts without running `bb auth logout` + `bb auth login`. Running with no argument lists the stored accounts with the active one marked.
+
+### Enhancements
+
+- **OAuth scope update** — the consent flow now requests `project:write`, `webhook`, `runner`, and `runner:write` in addition to the existing scopes. **After upgrading, run `bb auth login` once to pick up the new scopes** — tokens issued by earlier versions will return 403 on the new commands.
+- **Account- and scope-aware error hint** — on a 403/404 response, `bb` now prints a targeted suggestion:
+  - Multiple accounts stored → "Hint: you are signed in as `X`. If another account has access, try: `bb auth switch <other>`".
+  - Single account + 403 → "Hint: this token may be missing a required scope. Run: `bb auth login`".
+- **Typed HTTP errors** — `pkg/api` now returns `*api.HTTPError{StatusCode, Message}` from non-2xx responses, so commands and future tooling can branch on status code without string matching.
+
+### Upgrade notes
+
+Run `bb auth login` after upgrading so your token carries the new scopes. If you maintain multiple Bitbucket accounts, `bb auth status` will list both and you can flip between them with `bb auth switch <account>`.
+
+---
+
 ## [0.3.0] — 2026-04-09
 
 ### New commands

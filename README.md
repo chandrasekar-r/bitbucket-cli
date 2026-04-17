@@ -84,6 +84,19 @@ bb workspace list          # list all accessible workspaces
 bb workspace use myteam    # set default workspace
 ```
 
+### Multi-account
+
+Log in with more than one Bitbucket account and flip between them without re-authenticating:
+
+```bash
+bb auth login              # authenticate account #1
+bb auth login              # authenticate account #2 (separate user)
+bb auth switch             # list stored accounts; active one marked *
+bb auth switch other_user  # set the active account
+```
+
+On a 403/404 response `bb` will suggest `bb auth switch` if another stored account might have access. On a 403 with a single stored account it suggests `bb auth login` (your token may be missing a scope added in a later release).
+
 ---
 
 ## Quick Start
@@ -117,12 +130,13 @@ bb branch tidy
 
 ### Authentication
 
-| Command          | Description                                |
-| ---------------- | ------------------------------------------ |
-| `bb auth login`  | Log in via browser OAuth or `--with-token` |
-| `bb auth logout` | Remove stored credentials                  |
-| `bb auth status` | Show current authentication state          |
-| `bb auth token`  | Print the active access token              |
+| Command                      | Description                                        |
+| ---------------------------- | -------------------------------------------------- |
+| `bb auth login`              | Log in via browser OAuth or `--with-token`         |
+| `bb auth logout`             | Remove stored credentials                          |
+| `bb auth status`             | Show current authentication state                  |
+| `bb auth switch [account]`   | Switch the active account; list accounts if bare   |
+| `bb auth token`              | Print the active access token                      |
 
 ### Workspaces
 
@@ -231,6 +245,49 @@ Issues must be enabled in Repository Settings → Features → Issues.
 | `bb snippet edit <id>`   | Edit in `$EDITOR`               |
 | `bb snippet delete <id>` | Delete a snippet                |
 | `bb snippet clone <id>`  | Clone snippet as a git repo     |
+
+### Webhooks
+
+| Command                               | Description                                       |
+| ------------------------------------- | ------------------------------------------------- |
+| `bb webhook list`                     | List webhooks (repo by default, `--workspace-only`) |
+| `bb webhook view <uuid>`              | Show a single webhook                             |
+| `bb webhook create --url --event`     | Create a webhook                                  |
+| `bb webhook update <uuid> [flags]`    | Update URL, events, description, or active state  |
+| `bb webhook delete <uuid>`            | Delete a webhook (confirm; `--force` for no-tty)  |
+
+The `--event` flag is repeatable **and** comma-separated:
+
+```bash
+bb webhook create \
+  --url https://example.com/bb-hook \
+  --event repo:push,pullrequest:created \
+  --event pullrequest:updated \
+  --description "CI trigger"
+```
+
+### Runners
+
+| Command                                    | Description                                           |
+| ------------------------------------------ | ----------------------------------------------------- |
+| `bb runner list`                           | List runners (workspace by default, `--repo` for repo) |
+| `bb runner view <uuid>`                    | Show a single runner                                  |
+| `bb runner create --name --label k=v`      | Register a self-hosted runner (prints one-time creds) |
+| `bb runner disable <uuid>`                 | Stop the runner from picking up new jobs              |
+| `bb runner enable <uuid>`                  | Re-enable a disabled runner                           |
+| `bb runner delete <uuid>`                  | Delete a runner                                       |
+
+**Important:** `bb runner create` prints the one-time OAuth client ID and secret returned by Bitbucket. Store these before closing the terminal — they cannot be retrieved later. If lost, delete the runner and create a new one.
+
+### Projects
+
+| Command                                   | Description                                            |
+| ----------------------------------------- | ------------------------------------------------------ |
+| `bb project list`                         | List projects in the active workspace                  |
+| `bb project view <key>`                   | Show a single project                                  |
+| `bb project create --key --name [flags]`  | Create a project (`--private`/`--public`, `--description`) |
+| `bb project update <key> [flags]`         | Update name, description, or visibility                |
+| `bb project delete <key>`                 | Delete a project (must have no repositories)           |
 
 ### Status dashboard
 

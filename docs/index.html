@@ -42,7 +42,7 @@
 <section class="hero">
   <div class="hero-content">
     <div class="hero-text">
-      <div class="hero-badge">Free &amp; Open Source &middot; v0.3.0</div>
+      <div class="hero-badge">Free &amp; Open Source &middot; v0.4.0</div>
       <h1 class="hero-headline">
         Take Bitbucket<br>to the command line.
       </h1>
@@ -288,11 +288,12 @@
     <div class="cmd-groups">
 
       <details class="cmd-group" open>
-        <summary><span class="grp-name">auth</span><span class="grp-count">4 commands</span></summary>
+        <summary><span class="grp-name">auth</span><span class="grp-count">5 commands</span></summary>
         <table class="cmd-table">
           <tr><td><code>bb auth login</code></td><td>Log in via browser OAuth or <code>--with-token</code></td></tr>
           <tr><td><code>bb auth logout</code></td><td>Remove stored credentials</td></tr>
           <tr><td><code>bb auth status</code></td><td>Show authentication state and token info</td></tr>
+          <tr><td><code>bb auth switch [account]</code></td><td>Switch the active stored account; list when bare</td></tr>
           <tr><td><code>bb auth token</code></td><td>Print active access token to stdout</td></tr>
         </table>
       </details>
@@ -381,6 +382,40 @@
           <tr><td><code>bb snippet edit &lt;id&gt;</code></td><td>Edit in <code>$EDITOR</code></td></tr>
           <tr><td><code>bb snippet delete &lt;id&gt;</code></td><td>Delete a snippet</td></tr>
           <tr><td><code>bb snippet clone &lt;id&gt;</code></td><td>Clone snippet as a git repo</td></tr>
+        </table>
+      </details>
+
+      <details class="cmd-group">
+        <summary><span class="grp-name">webhook</span><span class="grp-count">5 commands &middot; new in v0.4.0</span></summary>
+        <table class="cmd-table">
+          <tr><td><code>bb webhook list</code></td><td>List webhooks (repo by default, <code>--workspace-only</code>)</td></tr>
+          <tr><td><code>bb webhook view &lt;uuid&gt;</code></td><td>Show a single webhook</td></tr>
+          <tr><td><code>bb webhook create --url --event</code></td><td>Create a webhook (<code>--event</code> repeatable and comma-separated)</td></tr>
+          <tr><td><code>bb webhook update &lt;uuid&gt;</code></td><td>Update URL, events, description, or active state</td></tr>
+          <tr><td><code>bb webhook delete &lt;uuid&gt;</code></td><td>Delete a webhook</td></tr>
+        </table>
+      </details>
+
+      <details class="cmd-group">
+        <summary><span class="grp-name">runner</span><span class="grp-count">6 commands &middot; new in v0.4.0</span></summary>
+        <table class="cmd-table">
+          <tr><td><code>bb runner list</code></td><td>List runners (workspace by default, <code>--repo</code>)</td></tr>
+          <tr><td><code>bb runner view &lt;uuid&gt;</code></td><td>Show a single runner</td></tr>
+          <tr><td><code>bb runner create --name --label k=v</code></td><td>Register a self-hosted runner (prints one-time creds)</td></tr>
+          <tr><td><code>bb runner disable &lt;uuid&gt;</code></td><td>Disable a runner</td></tr>
+          <tr><td><code>bb runner enable &lt;uuid&gt;</code></td><td>Re-enable a disabled runner</td></tr>
+          <tr><td><code>bb runner delete &lt;uuid&gt;</code></td><td>Delete a runner</td></tr>
+        </table>
+      </details>
+
+      <details class="cmd-group">
+        <summary><span class="grp-name">project</span><span class="grp-count">5 commands &middot; new in v0.4.0</span></summary>
+        <table class="cmd-table">
+          <tr><td><code>bb project list</code></td><td>List projects in the active workspace</td></tr>
+          <tr><td><code>bb project view &lt;key&gt;</code></td><td>Show a single project</td></tr>
+          <tr><td><code>bb project create --key --name</code></td><td>Create a project (<code>--private</code>/<code>--public</code>)</td></tr>
+          <tr><td><code>bb project update &lt;key&gt;</code></td><td>Update name, description, or visibility</td></tr>
+          <tr><td><code>bb project delete &lt;key&gt;</code></td><td>Delete a project (must be empty)</td></tr>
         </table>
       </details>
 
