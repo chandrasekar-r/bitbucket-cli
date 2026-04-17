@@ -17,10 +17,13 @@ import (
 	issuecmd "github.com/chandrasekar-r/bitbucket-cli/pkg/cmd/issue"
 	pipelinecmd "github.com/chandrasekar-r/bitbucket-cli/pkg/cmd/pipeline"
 	prcmd "github.com/chandrasekar-r/bitbucket-cli/pkg/cmd/pr"
+	projectcmd "github.com/chandrasekar-r/bitbucket-cli/pkg/cmd/project"
 	repocmd "github.com/chandrasekar-r/bitbucket-cli/pkg/cmd/repo"
+	runnercmd "github.com/chandrasekar-r/bitbucket-cli/pkg/cmd/runner"
 	snippetcmd "github.com/chandrasekar-r/bitbucket-cli/pkg/cmd/snippet"
 	statuscmd "github.com/chandrasekar-r/bitbucket-cli/pkg/cmd/status"
 	versioncmd "github.com/chandrasekar-r/bitbucket-cli/pkg/cmd/version"
+	webhookcmd "github.com/chandrasekar-r/bitbucket-cli/pkg/cmd/webhook"
 	workspacecmd "github.com/chandrasekar-r/bitbucket-cli/pkg/cmd/workspace"
 	"github.com/chandrasekar-r/bitbucket-cli/pkg/cmdutil"
 	"github.com/chandrasekar-r/bitbucket-cli/pkg/config"
@@ -174,6 +177,9 @@ Start with: bb auth login`,
 	cmd.AddCommand(pipelinecmd.NewCmdPipeline(f))
 	cmd.AddCommand(issuecmd.NewCmdIssue(f))
 	cmd.AddCommand(snippetcmd.NewCmdSnippet(f))
+	cmd.AddCommand(webhookcmd.NewCmdWebhook(f))
+	cmd.AddCommand(runnercmd.NewCmdRunner(f))
+	cmd.AddCommand(projectcmd.NewCmdProject(f))
 	cmd.AddCommand(statuscmd.NewCmdStatus(f))
 	cmd.AddCommand(versioncmd.NewCmdVersion(f))
 	cmd.AddCommand(completion.NewCmdCompletion(f))

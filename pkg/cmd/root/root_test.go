@@ -9,6 +9,33 @@ import (
 	"github.com/chandrasekar-r/bitbucket-cli/pkg/api"
 )
 
+func TestNewCmdRoot_RegistersExpectedCommands(t *testing.T) {
+	cmd, _ := NewCmdRoot()
+	want := map[string]bool{
+		"auth":      true,
+		"workspace": true,
+		"repo":      true,
+		"branch":    true,
+		"pr":        true,
+		"pipeline":  true,
+		"issue":     true,
+		"snippet":   true,
+		"status":    true,
+		"webhook":   true, // v0.4.0
+		"runner":    true, // v0.4.0
+		"project":   true, // v0.4.0
+	}
+	got := map[string]bool{}
+	for _, sub := range cmd.Commands() {
+		got[sub.Name()] = true
+	}
+	for name := range want {
+		if !got[name] {
+			t.Errorf("command %q not registered on root", name)
+		}
+	}
+}
+
 // stubAccounts returns a listAccountsFunc that yields the given state.
 func stubAccounts(usernames []string, active string, err error) listAccountsFunc {
 	return func() ([]string, string, error) {
