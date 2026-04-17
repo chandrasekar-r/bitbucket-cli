@@ -4,6 +4,7 @@ import (
 	"github.com/chandrasekar-r/bitbucket-cli/pkg/cmd/auth/login"
 	"github.com/chandrasekar-r/bitbucket-cli/pkg/cmd/auth/logout"
 	authstatus "github.com/chandrasekar-r/bitbucket-cli/pkg/cmd/auth/status"
+	"github.com/chandrasekar-r/bitbucket-cli/pkg/cmd/auth/switchacct"
 	authtoken "github.com/chandrasekar-r/bitbucket-cli/pkg/cmd/auth/token"
 	"github.com/chandrasekar-r/bitbucket-cli/pkg/cmdutil"
 	"github.com/spf13/cobra"
@@ -19,12 +20,14 @@ func NewCmdAuth(f *cmdutil.Factory) *cobra.Command {
   bb auth login       Log in using OAuth or an API token
   bb auth logout      Remove stored credentials
   bb auth status      Show authentication state
+  bb auth switch      Switch the active stored account
   bb auth token       Print the active access token`,
 	}
 
 	cmd.AddCommand(login.NewCmdLogin(f))
 	cmd.AddCommand(logout.NewCmdLogout(f))
 	cmd.AddCommand(authstatus.NewCmdStatus(f))
+	cmd.AddCommand(switchacct.NewCmdSwitch(f))
 	cmd.AddCommand(authtoken.NewCmdToken(f))
 	return cmd
 }

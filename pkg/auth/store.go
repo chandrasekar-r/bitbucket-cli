@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"sort"
 	"time"
 
 	"github.com/chandrasekar-r/bitbucket-cli/pkg/config"
@@ -142,6 +143,32 @@ func (s *TokenStore) SetAccount(acc *Account) error {
 	return s.withLock(func(tf *tokenFile) error {
 		tf.Accounts[acc.Username] = acc
 		tf.ActiveAccount = acc.Username
+		return nil
+	})
+}
+
+// ListAccounts returns the stored usernames (sorted) and the active username.
+func (s *TokenStore) ListAccounts() (usernames []string, active string, err error) {
+	tf, err := s.Load()
+	if err != nil {
+		return nil, "", err
+	}
+	usernames = make([]string, 0, len(tf.Accounts))
+	for u := range tf.Accounts {
+		usernames = append(usernames, u)
+	}
+	sort.Strings(usernames)
+	return usernames, tf.ActiveAccount, nil
+}
+
+// SetActiveAccount marks username as the active account. Returns an error if
+// the account is not in the store.
+func (s *TokenStore) SetActiveAccount(username string) error {
+	return s.withLock(func(tf *tokenFile) error {
+		if _, ok := tf.Accounts[username]; !ok {
+			return fmt.Errorf("account %q not found in store", username)
+		}
+		tf.ActiveAccount = username
 		return nil
 	})
 }

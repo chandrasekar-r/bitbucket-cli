@@ -201,8 +201,40 @@ func Execute() {
 	cmd, _ := NewCmdRoot()
 	if err := cmd.Execute(); err != nil {
 		fmt.Fprintf(os.Stderr, "Error: %s\n", err)
+		if hint := accountSwitchHint(err); hint != "" {
+			fmt.Fprintln(os.Stderr, hint)
+		}
 		os.Exit(1)
 	}
+}
+
+// accountSwitchHint returns a suggestion to try `bb auth switch` when the error
+// is a 403/404 from the Bitbucket API and the user has more than one stored
+// account. Returns "" when the hint doesn't apply. Any lookup failure is
+// treated as "no hint" — we never block the original error on this.
+func accountSwitchHint(err error) string {
+	var httpErr *api.HTTPError
+	if !errors.As(err, &httpErr) {
+		return ""
+	}
+	if httpErr.StatusCode != http.StatusForbidden && httpErr.StatusCode != http.StatusNotFound {
+		return ""
+	}
+	store := bbauth.NewTokenStore()
+	usernames, active, lerr := store.ListAccounts()
+	if lerr != nil || len(usernames) < 2 {
+		return ""
+	}
+	var others []string
+	for _, u := range usernames {
+		if u != active {
+			others = append(others, u)
+		}
+	}
+	return fmt.Sprintf(
+		"Hint: you are signed in as %q. If another account has access, try:\n  bb auth switch %s",
+		active, others[0],
+	)
 }
 
 // bearerTransport adds an OAuth Bearer token Authorization header.
