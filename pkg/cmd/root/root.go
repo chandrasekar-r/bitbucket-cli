@@ -17,10 +17,13 @@ import (
 	issuecmd "github.com/chandrasekar-r/bitbucket-cli/pkg/cmd/issue"
 	pipelinecmd "github.com/chandrasekar-r/bitbucket-cli/pkg/cmd/pipeline"
 	prcmd "github.com/chandrasekar-r/bitbucket-cli/pkg/cmd/pr"
+	projectcmd "github.com/chandrasekar-r/bitbucket-cli/pkg/cmd/project"
 	repocmd "github.com/chandrasekar-r/bitbucket-cli/pkg/cmd/repo"
+	runnercmd "github.com/chandrasekar-r/bitbucket-cli/pkg/cmd/runner"
 	snippetcmd "github.com/chandrasekar-r/bitbucket-cli/pkg/cmd/snippet"
 	statuscmd "github.com/chandrasekar-r/bitbucket-cli/pkg/cmd/status"
 	versioncmd "github.com/chandrasekar-r/bitbucket-cli/pkg/cmd/version"
+	webhookcmd "github.com/chandrasekar-r/bitbucket-cli/pkg/cmd/webhook"
 	workspacecmd "github.com/chandrasekar-r/bitbucket-cli/pkg/cmd/workspace"
 	"github.com/chandrasekar-r/bitbucket-cli/pkg/cmdutil"
 	"github.com/chandrasekar-r/bitbucket-cli/pkg/config"
@@ -174,6 +177,9 @@ Start with: bb auth login`,
 	cmd.AddCommand(pipelinecmd.NewCmdPipeline(f))
 	cmd.AddCommand(issuecmd.NewCmdIssue(f))
 	cmd.AddCommand(snippetcmd.NewCmdSnippet(f))
+	cmd.AddCommand(webhookcmd.NewCmdWebhook(f))
+	cmd.AddCommand(runnercmd.NewCmdRunner(f))
+	cmd.AddCommand(projectcmd.NewCmdProject(f))
 	cmd.AddCommand(statuscmd.NewCmdStatus(f))
 	cmd.AddCommand(versioncmd.NewCmdVersion(f))
 	cmd.AddCommand(completion.NewCmdCompletion(f))
@@ -201,8 +207,62 @@ func Execute() {
 	cmd, _ := NewCmdRoot()
 	if err := cmd.Execute(); err != nil {
 		fmt.Fprintf(os.Stderr, "Error: %s\n", err)
+		if hint := authHint(err, defaultListAccounts); hint != "" {
+			fmt.Fprintln(os.Stderr, hint)
+		}
 		os.Exit(1)
 	}
+}
+
+// listAccountsFunc returns the stored usernames (sorted) and the active one.
+// It's a seam that lets authHint be tested without touching ~/.config/bb.
+type listAccountsFunc func() (usernames []string, active string, err error)
+
+func defaultListAccounts() ([]string, string, error) {
+	return bbauth.NewTokenStore().ListAccounts()
+}
+
+// authHint returns a user-facing hint to help disambiguate 403/404 failures.
+//
+// There are two cases we recognize:
+//  1. 404 or 403 with multiple stored accounts → suggest `bb auth switch` to
+//     the other account (the active account may simply lack access to the
+//     resource).
+//  2. 403 with exactly one stored account → suggest `bb auth login`. The
+//     token is authenticated but may be missing a scope added in a later
+//     version of bb (e.g. the v0.4.0 webhook/runner/project scopes).
+//
+// Returns "" when the hint doesn't apply. Any lookup failure is treated as
+// "no hint" — we never block the original error on this.
+func authHint(err error, listAccounts listAccountsFunc) string {
+	var httpErr *api.HTTPError
+	if !errors.As(err, &httpErr) {
+		return ""
+	}
+	if httpErr.StatusCode != http.StatusForbidden && httpErr.StatusCode != http.StatusNotFound {
+		return ""
+	}
+	usernames, active, lerr := listAccounts()
+	if lerr != nil {
+		return ""
+	}
+
+	if len(usernames) >= 2 {
+		for _, u := range usernames {
+			if u != active {
+				return fmt.Sprintf(
+					"Hint: you are signed in as %q. If another account has access, try:\n  bb auth switch %s",
+					active, u,
+				)
+			}
+		}
+	}
+
+	if httpErr.StatusCode == http.StatusForbidden && len(usernames) == 1 {
+		return "Hint: this token may be missing a required scope. Run:\n  bb auth login"
+	}
+
+	return ""
 }
 
 // bearerTransport adds an OAuth Bearer token Authorization header.

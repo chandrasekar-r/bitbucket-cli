@@ -116,6 +116,68 @@ func TestTokenStore_ConcurrentRefreshRace(t *testing.T) {
 	}
 }
 
+func TestTokenStore_SetActiveAccount(t *testing.T) {
+	dir := t.TempDir()
+	store := NewTokenStoreAt(filepath.Join(dir, "tokens.json"))
+
+	a := &Account{Username: "alice", AccessToken: "a", AuthType: AuthTypeToken}
+	b := &Account{Username: "bob", AccessToken: "b", AuthType: AuthTypeToken}
+	if err := store.SetAccount(a); err != nil {
+		t.Fatalf("SetAccount alice: %v", err)
+	}
+	if err := store.SetAccount(b); err != nil {
+		t.Fatalf("SetAccount bob: %v", err)
+	}
+	// bob was added last, so bob is active
+	active, _ := store.GetActive()
+	if active.Username != "bob" {
+		t.Fatalf("setup: active=%q, want bob", active.Username)
+	}
+
+	if err := store.SetActiveAccount("alice"); err != nil {
+		t.Fatalf("SetActiveAccount alice: %v", err)
+	}
+	active, _ = store.GetActive()
+	if active.Username != "alice" {
+		t.Errorf("after switch: active=%q, want alice", active.Username)
+	}
+
+	// Unknown account is rejected and active is unchanged.
+	if err := store.SetActiveAccount("carol"); err == nil {
+		t.Error("SetActiveAccount carol: expected error, got nil")
+	}
+	active, _ = store.GetActive()
+	if active.Username != "alice" {
+		t.Errorf("after failed switch: active=%q, want alice (unchanged)", active.Username)
+	}
+}
+
+func TestTokenStore_ListAccounts(t *testing.T) {
+	dir := t.TempDir()
+	store := NewTokenStoreAt(filepath.Join(dir, "tokens.json"))
+
+	_ = store.SetAccount(&Account{Username: "charlie", AccessToken: "c", AuthType: AuthTypeToken})
+	_ = store.SetAccount(&Account{Username: "alice", AccessToken: "a", AuthType: AuthTypeToken})
+	_ = store.SetAccount(&Account{Username: "bob", AccessToken: "b", AuthType: AuthTypeToken})
+
+	usernames, active, err := store.ListAccounts()
+	if err != nil {
+		t.Fatalf("ListAccounts: %v", err)
+	}
+	want := []string{"alice", "bob", "charlie"}
+	if len(usernames) != len(want) {
+		t.Fatalf("usernames: got %v, want %v", usernames, want)
+	}
+	for i, u := range want {
+		if usernames[i] != u {
+			t.Errorf("usernames[%d] = %q, want %q", i, usernames[i], u)
+		}
+	}
+	if active != "bob" {
+		t.Errorf("active = %q, want bob", active)
+	}
+}
+
 func TestAccount_IsExpired(t *testing.T) {
 	cases := []struct {
 		name    string

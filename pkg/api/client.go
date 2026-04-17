@@ -123,7 +123,19 @@ func (c *Client) do(method, path string, body any) (*http.Response, error) {
 	return resp, nil
 }
 
-// checkStatus returns an error for non-2xx responses.
+// HTTPError is returned for non-2xx Bitbucket responses. Exposing the status
+// code lets callers (e.g. root Execute) attach context-aware hints such as
+// suggesting `bb auth switch` on 403/404.
+type HTTPError struct {
+	StatusCode int
+	Message    string
+}
+
+func (e *HTTPError) Error() string {
+	return fmt.Sprintf("HTTP %d: %s", e.StatusCode, e.Message)
+}
+
+// checkStatus returns an *HTTPError for non-2xx responses.
 func checkStatus(resp *http.Response) error {
 	if resp.StatusCode >= 200 && resp.StatusCode < 300 {
 		return nil
@@ -132,17 +144,16 @@ func checkStatus(resp *http.Response) error {
 	body, _ := io.ReadAll(resp.Body)
 	resp.Body.Close()
 
-	// Try to extract Bitbucket's error message format
+	msg := http.StatusText(resp.StatusCode)
 	var apiErr struct {
 		Error struct {
 			Message string `json:"message"`
 		} `json:"error"`
 	}
 	if json.Unmarshal(body, &apiErr) == nil && apiErr.Error.Message != "" {
-		return fmt.Errorf("HTTP %d: %s", resp.StatusCode, apiErr.Error.Message)
+		msg = apiErr.Error.Message
 	}
-
-	return fmt.Errorf("HTTP %d: %s", resp.StatusCode, http.StatusText(resp.StatusCode))
+	return &HTTPError{StatusCode: resp.StatusCode, Message: msg}
 }
 
 // retryTransport wraps an http.RoundTripper with exponential backoff on 429 responses.
