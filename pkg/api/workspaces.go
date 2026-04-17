@@ -27,14 +27,6 @@ type WorkspaceMember struct {
 	Permission string `json:"permission"`
 }
 
-// Project represents a Bitbucket project within a workspace.
-type Project struct {
-	Key         string `json:"key"`
-	Name        string `json:"name"`
-	Description string `json:"description"`
-	IsPrivate   bool   `json:"is_private"`
-}
-
 // Link is a generic Bitbucket API hypermedia link.
 type Link struct {
 	Href string `json:"href"`
@@ -80,21 +72,4 @@ func (c *Client) ListWorkspaceMembers(slug string, limit int) ([]WorkspaceMember
 		}
 	}
 	return members, nil
-}
-
-// ListWorkspaceProjects returns projects in a workspace.
-func (c *Client) ListWorkspaceProjects(slug string, limit int) ([]Project, error) {
-	path := fmt.Sprintf("/workspaces/%s/projects?pagelen=50", slug)
-	items, err := PaginateAll(c, path, limit)
-	if err != nil {
-		return nil, fmt.Errorf("listing workspace projects: %w", err)
-	}
-	projects := make([]Project, 0, len(items))
-	for _, raw := range items {
-		var p Project
-		if err := json.Unmarshal(raw, &p); err == nil {
-			projects = append(projects, p)
-		}
-	}
-	return projects, nil
 }
