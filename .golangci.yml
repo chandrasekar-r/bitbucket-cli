@@ -1,0 +1,28 @@
+version: "2"
+
+run:
+  timeout: 5m
+  modules-download-mode: readonly
+
+linters:
+  settings:
+    errcheck:
+      # Functions whose error returns are non-actionable in a CLI tool:
+      # - fmt.Print* to stdout/stderr: if stdout breaks, the process will terminate anyway
+      # - defer Close/Unlock: errors from deferred cleanup cannot be returned or acted on
+      # - http.Server lifecycle: Serve returns only after Close; Close is called during shutdown
+      # - os.Remove: best-effort temp file cleanup, failure is not fatal
+      exclude-functions:
+        - fmt.Print
+        - fmt.Fprint
+        - fmt.Fprintf
+        - fmt.Fprintln
+        - fmt.Println
+        - (net.Listener).Close
+        - (*net/http.Server).Close
+        - (*net/http.Server).Serve
+        - (*os.File).Close
+        - (io.ReadCloser).Close
+        - (io.Closer).Close
+        - os.Remove
+        - (*github.com/gofrs/flock.Flock).Unlock

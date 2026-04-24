@@ -1,0 +1,24 @@
+# Build artifacts
+bin/
+dist/
+completions/
+
+# Go
+*.exe
+*.test
+*.out
+vendor/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# macOS
+.DS_Store
+
+# Environment — never commit credentials
+.env
+.env.*
+*.env
