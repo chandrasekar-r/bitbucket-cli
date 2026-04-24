@@ -1,0 +1,107 @@
+version: 2
+project_name: bb
+
+before:
+  hooks:
+    - go mod tidy
+    - go generate ./...
+    - bash scripts/completions.sh
+
+builds:
+  - id: bb
+    main: ./cmd/bb
+    binary: bb
+    env:
+      - CGO_ENABLED=0 # Static binary — no glibc dependency; runs on Alpine
+    goos:
+      - linux
+      - darwin
+      - windows
+    goarch:
+      - amd64
+      - arm64
+    ignore:
+      - goos: windows
+        goarch: arm64
+    ldflags:
+      - -s -w
+      - -X github.com/chandrasekar-r/bitbucket-cli/internal/version.Version={{.Version}}
+      - -X github.com/chandrasekar-r/bitbucket-cli/internal/version.BuildDate={{.Date}}
+      - -X github.com/chandrasekar-r/bitbucket-cli/internal/version.Commit={{.FullCommit}}
+      - -X github.com/chandrasekar-r/bitbucket-cli/internal/version.OAuthClientID={{.Env.BB_OAUTH_CLIENT_ID}}
+      - -X github.com/chandrasekar-r/bitbucket-cli/internal/version.OAuthClientSecret={{.Env.BB_OAUTH_CLIENT_SECRET}}
+
+# Merge macOS Intel + ARM64 into a single universal binary
+universal_binaries:
+  - id: bb-universal
+    ids: [bb]
+    replace: true
+
+archives:
+  - id: default
+    formats: [tar.gz]
+    format_overrides:
+      - goos: windows
+        formats: [zip]
+    name_template: "{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
+    files:
+      - completions/**
+
+checksum:
+  name_template: checksums.txt
+
+# Linux .deb and .rpm packages via nfpm
+nfpms:
+  - id: packages
+    package_name: bb
+    vendor: chandrasekar-r
+    homepage: https://github.com/chandrasekar-r/bitbucket-cli
+    maintainer: Chandrasekar <chandrasekar.r@gmail.com>
+    description: Bitbucket Cloud CLI — manage PRs, repos, pipelines, and more from your terminal
+    license: MIT
+    formats: [deb, rpm]
+    contents:
+      - src: completions/bb.bash
+        dst: /etc/bash_completion.d/bb
+      - src: completions/bb.zsh
+        dst: /usr/share/zsh/vendor-completions/_bb
+      - src: completions/bb.fish
+        dst: /usr/share/fish/vendor_completions.d/bb.fish
+
+# Homebrew Cask for macOS (use homebrew_casks, not the deprecated brews)
+homebrew_casks:
+  - name: bb
+    repository:
+      owner: chandrasekar-r
+      name: homebrew-tap
+      token: "{{ .Env.HOMEBREW_TAP_TOKEN }}"
+    homepage: https://github.com/chandrasekar-r/bitbucket-cli
+    description: Bitbucket Cloud CLI
+    commit_msg_template: "Cask update for {{ .ProjectName }} version {{ .Tag }}"
+
+# Scoop bucket for Windows
+scoops:
+  - name: bb
+    repository:
+      owner: chandrasekar-r
+      name: scoop-bucket
+      token: "{{ .Env.SCOOP_BUCKET_TOKEN }}"
+    homepage: https://github.com/chandrasekar-r/bitbucket-cli
+    description: Bitbucket Cloud CLI
+    license: MIT
+
+release:
+  github:
+    owner: chandrasekar-r
+    name: bitbucket-cli
+
+changelog:
+  sort: asc
+  filters:
+    exclude:
+      - "^docs:"
+      - "^test:"
+      - "^chore:"
+      - "merge conflict"
+      - Merge pull request
+      - Merge branch
