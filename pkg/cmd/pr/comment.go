@@ -10,17 +10,27 @@ import (
 
 	"github.com/chandrasekar-r/bitbucket-cli/pkg/api"
 	"github.com/chandrasekar-r/bitbucket-cli/pkg/cmdutil"
+	"github.com/chandrasekar-r/bitbucket-cli/pkg/output"
 	"github.com/spf13/cobra"
 )
 
 func newCmdComment(f *cmdutil.Factory) *cobra.Command {
 	var body string
+	var formatHelp bool
 
 	cmd := &cobra.Command{
 		Use:   "comment <number>",
 		Short: "Add a comment to a pull request",
-		Args:  cobra.MaximumNArgs(1),
+		Long: `Add a comment to a pull request.
+
+Comment body supports Bitbucket Markdown. Run --format-help to see available syntax.`,
+		Args: cobra.MaximumNArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
+			if formatHelp {
+				fmt.Fprint(f.IOStreams.Out, output.BitbucketMarkdownGuide())
+				return nil
+			}
+
 			workspace, slug, err := repoContext(f)
 			if err != nil {
 				return err
@@ -59,7 +69,8 @@ func newCmdComment(f *cmdutil.Factory) *cobra.Command {
 		},
 	}
 
-	cmd.Flags().StringVar(&body, "body", "", "Comment text")
+	cmd.Flags().StringVar(&body, "body", "", "Comment text (supports Bitbucket Markdown)")
+	cmd.Flags().BoolVar(&formatHelp, "format-help", false, "Show Bitbucket Markdown formatting reference and exit")
 	cmd.ValidArgsFunction = cmdutil.CompletePRIDs(f, "OPEN")
 	return cmd
 }
