@@ -20,6 +20,7 @@ import (
 func NewCmdLogin(f *cmdutil.Factory) *cobra.Command {
 	var withToken bool
 	var username string
+	var token string
 
 	cmd := &cobra.Command{
 		Use:   "login",
@@ -31,10 +32,26 @@ In CI or headless environments, pipe a Bitbucket API token via stdin:
 
   echo "$BB_TOKEN" | bb auth login --with-token --username myusername
 
-Note: App passwords are deprecated as of June 2026. Use Bitbucket API tokens.`,
+To pass the token directly (less secure — value appears in shell history):
+
+  bb auth login --token "$BB_TOKEN" --username myusername
+
+Note: App passwords are disabled as of June 9, 2026. Use Bitbucket API tokens.`,
 		RunE: func(cmd *cobra.Command, args []string) error {
+			if cmd.Flags().Changed("token") {
+				if token == "" {
+					return &cmdutil.FlagError{Err: errors.New("--token value cannot be empty")}
+				}
+				if !cmd.Flags().Changed("username") {
+					return &cmdutil.FlagError{Err: errors.New("--username is required when --token is used")}
+				}
+				fmt.Fprintln(f.IOStreams.ErrOut,
+					"Warning: --token value appears in shell history and process listings.\n"+
+						"Prefer: echo $TOKEN | bb auth login --with-token --username <user>")
+				return runTokenLogin(f, username, token)
+			}
 			if withToken {
-				return runTokenLogin(f, username)
+				return runTokenLogin(f, username, "")
 			}
 			return runOAuthLogin(f)
 		},
@@ -44,6 +61,8 @@ Note: App passwords are deprecated as of June 2026. Use Bitbucket API tokens.`,
 		"Read a Bitbucket API token from stdin instead of browser OAuth")
 	cmd.Flags().StringVar(&username, "username", "",
 		"Bitbucket username (required with --with-token in --no-tty mode)")
+	cmd.Flags().StringVar(&token, "token", "",
+		"Bitbucket API token (insecure: value visible in shell history; prefer --with-token)")
 
 	return cmd
 }
@@ -58,24 +77,29 @@ func runOAuthLogin(f *cmdutil.Factory) error {
 		bbauth.AuthTypeOAuth, result.Expiry)
 }
 
-// runTokenLogin reads a Bitbucket API token from IOStreams.In and validates it.
-func runTokenLogin(f *cmdutil.Factory, username string) error {
-	scanner := bufio.NewScanner(f.IOStreams.In)
-	scanner.Scan()
-	token := strings.TrimSpace(scanner.Text())
-	if token == "" {
-		return &cmdutil.FlagError{Err: errors.New("token is empty — pipe a Bitbucket API token via stdin")}
-	}
-
-	if username == "" {
-		if !f.IOStreams.IsStdoutTTY() {
-			return &cmdutil.FlagError{Err: errors.New("--username is required when --with-token is used in non-interactive mode")}
-		}
-		fmt.Fprint(f.IOStreams.Out, "Bitbucket username: ")
+// runTokenLogin validates and stores a Bitbucket API token.
+// preToken, when non-empty, is used directly instead of reading from stdin.
+func runTokenLogin(f *cmdutil.Factory, username, preToken string) error {
+	var token string
+	if preToken != "" {
+		token = preToken
+	} else {
+		scanner := bufio.NewScanner(f.IOStreams.In)
 		scanner.Scan()
-		username = strings.TrimSpace(scanner.Text())
+		token = strings.TrimSpace(scanner.Text())
+		if token == "" {
+			return &cmdutil.FlagError{Err: errors.New("token is empty — pipe a Bitbucket API token via stdin")}
+		}
 		if username == "" {
-			return errors.New("username cannot be empty")
+			if !f.IOStreams.IsStdoutTTY() {
+				return &cmdutil.FlagError{Err: errors.New("--username is required when --with-token is used in non-interactive mode")}
+			}
+			fmt.Fprint(f.IOStreams.Out, "Bitbucket username: ")
+			scanner.Scan()
+			username = strings.TrimSpace(scanner.Text())
+			if username == "" {
+				return errors.New("username cannot be empty")
+			}
 		}
 	}
 
