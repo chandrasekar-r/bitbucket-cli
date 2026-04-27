@@ -64,7 +64,11 @@ Opens your browser for Bitbucket OAuth 2.0. Credentials are stored in `~/.config
 Create a Bitbucket API token at **Bitbucket → Settings → Security → API tokens**, then:
 
 ```bash
+# Pipe from an environment variable (preferred — token never in shell history)
 echo "$BB_TOKEN" | bb auth login --with-token --username myusername
+
+# Pass inline (convenient for scripting; prints a security warning)
+bb auth login --token "$BB_TOKEN" --username myusername
 ```
 
 Or use environment variables — no `auth login` needed:
@@ -132,7 +136,7 @@ bb branch tidy
 
 | Command                      | Description                                        |
 | ---------------------------- | -------------------------------------------------- |
-| `bb auth login`              | Log in via browser OAuth or `--with-token`         |
+| `bb auth login`              | Log in via browser OAuth, `--with-token`, or `--token` |
 | `bb auth logout`             | Remove stored credentials                          |
 | `bb auth status`             | Show current authentication state                  |
 | `bb auth switch [account]`   | Switch the active account; list accounts if bare   |
@@ -184,7 +188,7 @@ bb branch tidy
 | `bb pr approve [number]`  | Approve a PR                                               |
 | `bb pr decline [number]`  | Decline a PR                                               |
 | `bb pr checkout [number]` | Check out PR source branch locally                         |
-| `bb pr comment [number]`  | Add a comment (`--body` or opens `$EDITOR`)                |
+| `bb pr comment [number]`  | Add a comment — use `--file`/`--line` for inline diff comments, `--format-help` for Markdown reference |
 | `bb pr diff [number]`     | Show unified diff                                          |
 | `bb pr browse [number]`   | Open in browser                                            |
 
@@ -477,6 +481,45 @@ Cross-platform snapshot (requires GoReleaser):
 ```bash
 BB_OAUTH_CLIENT_ID=dev make release-dry-run
 ```
+
+---
+
+## Changelog
+
+### v1.1.0 (2026-04-27)
+
+**`bb pr comment` — inline diff comments**
+
+Pin a comment to a specific file or line in the pull request diff:
+
+```bash
+# Line-level inline comment
+bb pr comment 42 --file pkg/api/prs.go --line 10 --body "why the cast here?"
+
+# File-level inline comment (anchored to file, no specific line)
+bb pr comment 42 --file pkg/api/prs.go --body "this whole file needs tests"
+
+# Bitbucket Markdown formatting reference
+bb pr comment --format-help
+```
+
+**`bb auth login --token`**
+
+Pass an API token directly on the command line — useful in scripts where stdin is occupied. A security warning is printed to stderr because the value appears in shell history and process listings; `--with-token` (stdin) remains the preferred approach for interactive sessions.
+
+```bash
+bb auth login --token "$BB_TOKEN" --username myusername
+```
+
+**Test coverage**
+
+Added tests for all 14 previously-untested command packages (`issue`, `pipeline`, `repo`, `project`, `snippet`, `workspace`, `extension`, and all `auth` sub-commands). Also tightened `resolveRepo` to reject `workspace/repo/extra` arguments with a clear error.
+
+---
+
+### v1.0.0 (2026-01-01)
+
+Initial public release. Full feature set: auth (OAuth + API token), workspaces, repositories, branches, pull requests, pipelines, issues, snippets, webhooks, runners, projects, batch operations, extensions, shell completions, and `--json`/`--jq` scripting output across all commands.
 
 ---
 
