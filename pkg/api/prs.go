@@ -277,6 +277,49 @@ func (c *Client) AddPRComment(workspace, slug string, id int, content string) er
 	return c.Post(path, body, nil)
 }
 
+// InlineComment describes the diff anchor for an inline PR comment.
+// To anchors to the destination/head side (the PR branch); From anchors to the
+// source/base side. Omit both to create a file-level comment (anchored to the
+// file header in the diff). Use nil to omit a field from the JSON body.
+type InlineComment struct {
+	Path string
+	To   *int // destination/head-side line (1-based); nil = omit
+	From *int // source/base-side line (1-based); nil = omit
+}
+
+// AddPRInlineComment adds an inline diff comment to a pull request.
+// The comment is anchored to inline.Path. When inline.To is non-nil it is
+// anchored to that specific line on the destination/head side of the diff.
+// Line numbers must be >= 1; the method returns an error without making a
+// network call if an invalid line number is provided.
+func (c *Client) AddPRInlineComment(workspace, slug string, id int, content string, inline InlineComment) error {
+	if inline.To != nil && *inline.To < 1 {
+		return fmt.Errorf("inline comment line number (to) must be >= 1, got %d", *inline.To)
+	}
+	if inline.From != nil && *inline.From < 1 {
+		return fmt.Errorf("inline comment line number (from) must be >= 1, got %d", *inline.From)
+	}
+
+	// Build the inline object with omitempty on pointer fields so nil pointers
+	// are omitted from the JSON body (file-level vs line-level distinction).
+	inlineBody := struct {
+		Path string `json:"path"`
+		To   *int   `json:"to,omitempty"`
+		From *int   `json:"from,omitempty"`
+	}{
+		Path: inline.Path,
+		To:   inline.To,
+		From: inline.From,
+	}
+
+	body := map[string]interface{}{
+		"content": map[string]string{"raw": content},
+		"inline":  inlineBody,
+	}
+	path := fmt.Sprintf("/repositories/%s/%s/pullrequests/%d/comments", workspace, slug, id)
+	return c.Post(path, body, nil)
+}
+
 // GetPRDiff returns the unified diff for a pull request as plain text.
 func (c *Client) GetPRDiff(workspace, slug string, id int) (string, error) {
 	path := fmt.Sprintf("/repositories/%s/%s/pullrequests/%d/diff", workspace, slug, id)
