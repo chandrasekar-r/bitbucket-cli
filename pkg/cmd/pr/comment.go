@@ -10,17 +10,52 @@ import (
 
 	"github.com/chandrasekar-r/bitbucket-cli/pkg/api"
 	"github.com/chandrasekar-r/bitbucket-cli/pkg/cmdutil"
+	"github.com/chandrasekar-r/bitbucket-cli/pkg/output"
 	"github.com/spf13/cobra"
 )
 
 func newCmdComment(f *cmdutil.Factory) *cobra.Command {
 	var body string
+	var formatHelp bool
+	var filePath string
+	var lineNum int
 
 	cmd := &cobra.Command{
 		Use:   "comment <number>",
 		Short: "Add a comment to a pull request",
-		Args:  cobra.MaximumNArgs(1),
+		Long: `Add a comment to a pull request.
+
+Comment body supports Bitbucket Markdown. Run --format-help to see available syntax.
+
+To add an inline diff comment anchored to a file or specific line:
+
+  bb pr comment 42 --body "why?" --file pkg/api/prs.go --line 10
+  bb pr comment 42 --body "whole file" --file pkg/api/prs.go`,
+		Args: cobra.MaximumNArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
+			if formatHelp {
+				fmt.Fprint(f.IOStreams.Out, output.BitbucketMarkdownGuide())
+				return nil
+			}
+
+			// Resolve inline flag presence using Changed() — value comparison
+			// is unreliable (int default 0, string default "").
+			fileSet := cmd.Flags().Changed("file")
+			lineSet := cmd.Flags().Changed("line")
+
+			// Validate flag combinations before touching the network.
+			if fileSet && filePath == "" {
+				return &cmdutil.FlagError{Err: errors.New("--file cannot be empty")}
+			}
+			if lineSet && !fileSet {
+				return &cmdutil.FlagError{Err: errors.New("--line requires --file")}
+			}
+			if lineSet && lineNum < 1 {
+				return &cmdutil.FlagError{Err: fmt.Errorf("--line must be a positive integer (1-based diff line), got %d", lineNum)}
+			}
+
+			isInline := fileSet
+
 			workspace, slug, err := repoContext(f)
 			if err != nil {
 				return err
@@ -37,9 +72,8 @@ func newCmdComment(f *cmdutil.Factory) *cobra.Command {
 
 			if body == "" {
 				if !f.IOStreams.IsStdoutTTY() {
-					return &cmdutil.FlagError{Err: errors.New("--body is required in --no-tty mode")}
+					return &cmdutil.FlagError{Err: errors.New("--body is required; use --body or run without --no-tty to open an editor")}
 				}
-				// Open $EDITOR for comment
 				body, err = openEditor()
 				if err != nil {
 					return err
@@ -51,6 +85,22 @@ func newCmdComment(f *cmdutil.Factory) *cobra.Command {
 				return errors.New("comment body cannot be empty")
 			}
 
+			if isInline {
+				inline := api.InlineComment{Path: filePath}
+				if lineSet {
+					inline.To = &lineNum
+				}
+				if err := client.AddPRInlineComment(workspace, slug, id, body, inline); err != nil {
+					return fmt.Errorf("adding inline comment: %w", err)
+				}
+				if lineSet {
+					fmt.Fprintf(f.IOStreams.Out, "✓ Inline comment added to %s:%d in PR #%d\n", filePath, lineNum, id)
+				} else {
+					fmt.Fprintf(f.IOStreams.Out, "✓ Inline comment added to %s in PR #%d\n", filePath, id)
+				}
+				return nil
+			}
+
 			if err := client.AddPRComment(workspace, slug, id, body); err != nil {
 				return fmt.Errorf("adding comment: %w", err)
 			}
@@ -59,7 +109,10 @@ func newCmdComment(f *cmdutil.Factory) *cobra.Command {
 		},
 	}
 
-	cmd.Flags().StringVar(&body, "body", "", "Comment text")
+	cmd.Flags().StringVar(&body, "body", "", "Comment text (supports Bitbucket Markdown)")
+	cmd.Flags().BoolVar(&formatHelp, "format-help", false, "Show Bitbucket Markdown formatting reference and exit")
+	cmd.Flags().StringVar(&filePath, "file", "", "Repo-relative file path for an inline diff comment")
+	cmd.Flags().IntVar(&lineNum, "line", 0, "Line number on the destination/head side of the diff (1-based, requires --file)")
 	cmd.ValidArgsFunction = cmdutil.CompletePRIDs(f, "OPEN")
 	return cmd
 }

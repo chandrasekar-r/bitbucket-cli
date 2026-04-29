@@ -68,6 +68,9 @@ func newCmdView(f *cmdutil.Factory) *cobra.Command {
 //   - The configured default workspace + the arg as slug
 func resolveRepo(f *cmdutil.Factory, args []string) (workspace, slug string, err error) {
 	if len(args) == 1 {
+		if strings.Count(args[0], "/") > 1 {
+			return "", "", fmt.Errorf("invalid repository argument %q: expected format workspace/repo", args[0])
+		}
 		parts := strings.SplitN(args[0], "/", 2)
 		if len(parts) == 2 {
 			return parts[0], parts[1], nil

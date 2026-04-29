@@ -62,5 +62,8 @@ func resolvePRID(f *cmdutil.Factory, client *api.Client, workspace, slug string,
 	if err != nil {
 		return 0, fmt.Errorf("unexpected picker value %q: %w", selected, err)
 	}
+	if id <= 0 {
+		return 0, fmt.Errorf("invalid PR number: %d", id)
+	}
 	return id, nil
 }
