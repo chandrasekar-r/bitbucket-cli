@@ -87,14 +87,17 @@ func (c *Config) writeConfig() error {
 // ConfigDir returns the OS-appropriate configuration directory for bb.
 //   - Unix/macOS: ~/.config/bb/
 //   - Windows:    %APPDATA%\bb\
+//
+// XDG_CONFIG_HOME always takes precedence on every platform so that tests
+// and CI jobs can redirect the config path without fighting OS defaults.
 func ConfigDir() string {
+	if xdg := os.Getenv("XDG_CONFIG_HOME"); xdg != "" {
+		return filepath.Join(xdg, appName)
+	}
 	if runtime.GOOS == "windows" {
 		if appData := os.Getenv("APPDATA"); appData != "" {
 			return filepath.Join(appData, appName)
 		}
-	}
-	if xdg := os.Getenv("XDG_CONFIG_HOME"); xdg != "" {
-		return filepath.Join(xdg, appName)
 	}
 	home, _ := os.UserHomeDir()
 	return filepath.Join(home, ".config", appName)
