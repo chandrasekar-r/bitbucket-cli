@@ -66,11 +66,6 @@ func commentServer(t *testing.T, capturedBody *map[string]interface{}, statusCod
 	}))
 }
 
-// silenceCmd suppresses Cobra's default error/usage output so test output stays clean.
-func silenceCmd(t *testing.T, f *cmdutil.Factory) *cmdutil.Factory {
-	t.Helper()
-	return f
-}
 
 func TestCommentCmd_LineLevelInline(t *testing.T) {
 	changeToBitbucketRepo(t)
