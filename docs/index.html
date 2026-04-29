@@ -42,7 +42,7 @@
 <section class="hero">
   <div class="hero-content">
     <div class="hero-text">
-      <div class="hero-badge">Free &amp; Open Source &middot; v2.0.0</div>
+      <div class="hero-badge">Free &amp; Open Source &middot; v2.1.0</div>
       <h1 class="hero-headline">
         Take Bitbucket<br>to the command line.
       </h1>
@@ -290,7 +290,7 @@
       <details class="cmd-group" open>
         <summary><span class="grp-name">auth</span><span class="grp-count">5 commands</span></summary>
         <table class="cmd-table">
-          <tr><td><code>bb auth login</code></td><td>Log in via browser OAuth or <code>--with-token</code></td></tr>
+          <tr><td><code>bb auth login</code></td><td>Log in via browser OAuth, <code>--with-token</code>, or <code>--token</code></td></tr>
           <tr><td><code>bb auth logout</code></td><td>Remove stored credentials</td></tr>
           <tr><td><code>bb auth status</code></td><td>Show authentication state and token info</td></tr>
           <tr><td><code>bb auth switch [account]</code></td><td>Switch the active stored account; list when bare</td></tr>
@@ -344,7 +344,7 @@
           <tr><td><code>bb pr approve [number]</code></td><td>Approve a PR</td></tr>
           <tr><td><code>bb pr decline [number]</code></td><td>Decline a PR</td></tr>
           <tr><td><code>bb pr checkout [number]</code></td><td>Check out PR source branch locally</td></tr>
-          <tr><td><code>bb pr comment [number]</code></td><td>Add a comment (<code>--body</code> or <code>$EDITOR</code>)</td></tr>
+          <tr><td><code>bb pr comment [number]</code></td><td>Add a comment; <code>--file</code>/<code>--line</code> for inline diff comments, <code>--format-help</code> for Markdown reference</td></tr>
           <tr><td><code>bb pr diff [number]</code></td><td>Show unified diff</td></tr>
           <tr><td><code>bb pr browse [number]</code></td><td>Open in browser</td></tr>
         </table>

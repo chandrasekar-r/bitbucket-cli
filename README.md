@@ -486,7 +486,7 @@ BB_OAUTH_CLIENT_ID=dev make release-dry-run
 
 ## Changelog
 
-### v1.1.0 (2026-04-27)
+### v2.1.0 (2026-04-29)
 
 **`bb pr comment` — inline diff comments**
 
@@ -517,7 +517,7 @@ Added tests for all 14 previously-untested command packages (`issue`, `pipeline`
 
 ---
 
-### v1.0.0 (2026-01-01)
+### v2.0.0 (2026-01-01)
 
 Initial public release. Full feature set: auth (OAuth + API token), workspaces, repositories, branches, pull requests, pipelines, issues, snippets, webhooks, runners, projects, batch operations, extensions, shell completions, and `--json`/`--jq` scripting output across all commands.
 
