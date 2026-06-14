@@ -6,6 +6,10 @@ All notable changes to `bb` are documented here. Dates are UTC. Versions follow 
 
 ## [Unreleased]
 
+---
+
+## [2.2.0] — 2026-06-14
+
 ### New commands
 
 - **`bb pr checks`** — show commit/build statuses (pipelines, Jenkins, Sonar, etc.) for a pull request's source commit. Supports `--json`/`--jq` and a colored TTY table.
@@ -118,6 +122,7 @@ Initial release.
 - Global `--workspace` / `--no-tty` persistent flags.
 - Distributed via Homebrew, Scoop, apt/rpm, and curl installer.
 
+[2.2.0]: https://github.com/chandrasekar-r/bitbucket-cli/compare/v2.1.0...v2.2.0
 [0.3.0]: https://github.com/chandrasekar-r/bitbucket-cli/compare/v0.2.0...v0.3.0
 [0.2.0]: https://github.com/chandrasekar-r/bitbucket-cli/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/chandrasekar-r/bitbucket-cli/releases/tag/v0.1.0

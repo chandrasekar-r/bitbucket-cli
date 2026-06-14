@@ -486,6 +486,16 @@ BB_OAUTH_CLIENT_ID=dev make release-dry-run
 
 ## Changelog
 
+### v2.2.0 (2026-06-14)
+
+Top 10 missing features wave: `bb pr checks`, `bb search`, enhanced `bb status`, PR comment subgroup (`add`/`list`/`reply`), `bb pr unapprove`/`review`, `bb browse`, `bb config`, `bb alias`, `bb variable`, `bb deploy-key`, and `bb ssh-key`.
+
+**Breaking:** `bb pr comment` is now `bb pr comment add`. Run `bb auth login` after upgrading if variable or deploy-key commands return 403.
+
+See [CHANGELOG.md](CHANGELOG.md) for full details.
+
+---
+
 ### v2.1.0 (2026-04-29)
 
 **`bb pr comment` — inline diff comments**
