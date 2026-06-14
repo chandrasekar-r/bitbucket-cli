@@ -23,6 +23,7 @@ func TestNewCmdRoot_RegistersExpectedCommands(t *testing.T) {
 		"status":    true,
 		"webhook":   true, // v0.4.0
 		"runner":    true, // v0.4.0
+		"search":    true,
 		"project":   true, // v0.4.0
 	}
 	got := map[string]bool{}

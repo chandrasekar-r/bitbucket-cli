@@ -9,6 +9,7 @@ All notable changes to `bb` are documented here. Dates are UTC. Versions follow 
 ### New commands
 
 - **`bb pr checks`** — show commit/build statuses (pipelines, Jenkins, Sonar, etc.) for a pull request's source commit. Supports `--json`/`--jq` and a colored TTY table.
+- **`bb search`** — search code (`bb search code <query>`) and repositories (`bb search repos <query>`) in the active workspace. Surfaces a friendly message when code search is disabled.
 
 ---
 

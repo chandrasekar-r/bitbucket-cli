@@ -20,6 +20,7 @@ import (
 	projectcmd "github.com/chandrasekar-r/bitbucket-cli/pkg/cmd/project"
 	repocmd "github.com/chandrasekar-r/bitbucket-cli/pkg/cmd/repo"
 	runnercmd "github.com/chandrasekar-r/bitbucket-cli/pkg/cmd/runner"
+	searchcmd "github.com/chandrasekar-r/bitbucket-cli/pkg/cmd/search"
 	snippetcmd "github.com/chandrasekar-r/bitbucket-cli/pkg/cmd/snippet"
 	statuscmd "github.com/chandrasekar-r/bitbucket-cli/pkg/cmd/status"
 	versioncmd "github.com/chandrasekar-r/bitbucket-cli/pkg/cmd/version"
@@ -179,6 +180,7 @@ Start with: bb auth login`,
 	cmd.AddCommand(snippetcmd.NewCmdSnippet(f))
 	cmd.AddCommand(webhookcmd.NewCmdWebhook(f))
 	cmd.AddCommand(runnercmd.NewCmdRunner(f))
+	cmd.AddCommand(searchcmd.NewCmdSearch(f))
 	cmd.AddCommand(projectcmd.NewCmdProject(f))
 	cmd.AddCommand(statuscmd.NewCmdStatus(f))
 	cmd.AddCommand(versioncmd.NewCmdVersion(f))
