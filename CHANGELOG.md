@@ -4,6 +4,14 @@ All notable changes to `bb` are documented here. Dates are UTC. Versions follow 
 
 ---
 
+## [Unreleased]
+
+### New commands
+
+- **`bb pr checks`** — show commit/build statuses (pipelines, Jenkins, Sonar, etc.) for a pull request's source commit. Supports `--json`/`--jq` and a colored TTY table.
+
+---
+
 ## [0.4.0] — 2026-04-17
 
 ### New commands

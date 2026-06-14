@@ -21,8 +21,9 @@ type PullRequest struct {
 		Username    string `json:"username"`
 	} `json:"author"`
 	Source struct {
-		Branch     struct{ Name string `json:"name"` }     `json:"branch"`
-		Repository *Repository `json:"repository"`
+		Branch     struct{ Name string `json:"name"` } `json:"branch"`
+		Commit     struct{ Hash string `json:"hash"` } `json:"commit"`
+		Repository *Repository                          `json:"repository"`
 	} `json:"source"`
 	Destination struct {
 		Branch     struct{ Name string `json:"name"` }     `json:"branch"`

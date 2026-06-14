@@ -23,7 +23,8 @@ func NewCmdPR(f *cmdutil.Factory) *cobra.Command {
   bb pr comment <number>    Add a comment to a pull request
   bb pr diff <number>       Show the pull request diff
   bb pr edit <number>       Edit a pull request
-  bb pr browse <number>     Open pull request in browser`,
+  bb pr browse <number>     Open pull request in browser
+  bb pr checks <number>     Show commit/build statuses for a PR`,
 	}
 	cmd.AddCommand(newCmdList(f))
 	cmd.AddCommand(newCmdEdit(f))
@@ -36,5 +37,6 @@ func NewCmdPR(f *cmdutil.Factory) *cobra.Command {
 	cmd.AddCommand(newCmdComment(f))
 	cmd.AddCommand(newCmdDiff(f))
 	cmd.AddCommand(newCmdBrowse(f))
+	cmd.AddCommand(newCmdChecks(f))
 	return cmd
 }
