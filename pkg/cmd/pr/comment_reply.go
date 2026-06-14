@@ -3,7 +3,6 @@ package pr
 import (
 	"errors"
 	"fmt"
-	"strconv"
 	"strings"
 
 	"github.com/chandrasekar-r/bitbucket-cli/pkg/api"
@@ -68,13 +67,4 @@ func newCmdCommentReply(f *cmdutil.Factory) *cobra.Command {
 	cmd.Flags().StringVar(&body, "body", "", "Reply text")
 	cmd.ValidArgsFunction = cmdutil.CompletePRIDs(f, "OPEN")
 	return cmd
-}
-
-// parseCommentID parses a comment ID from a string argument.
-func parseCommentID(s string) (int, error) {
-	id, err := strconv.Atoi(strings.TrimPrefix(s, "#"))
-	if err != nil {
-		return 0, fmt.Errorf("invalid comment ID %q", s)
-	}
-	return id, nil
 }

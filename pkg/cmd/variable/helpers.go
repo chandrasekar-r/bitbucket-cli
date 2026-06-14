@@ -11,10 +11,9 @@ import (
 )
 
 type scope struct {
-	workspace    string
-	repoSlug     string
-	envName      string
-	envUUID      string
+	workspace     string
+	repoSlug      string
+	envName       string
 	workspaceOnly bool
 }
 
