@@ -12,19 +12,25 @@ import (
 func TestNewCmdRoot_RegistersExpectedCommands(t *testing.T) {
 	cmd, _ := NewCmdRoot()
 	want := map[string]bool{
-		"auth":      true,
-		"workspace": true,
-		"repo":      true,
-		"branch":    true,
-		"pr":        true,
-		"pipeline":  true,
-		"issue":     true,
-		"snippet":   true,
-		"status":    true,
-		"webhook":   true, // v0.4.0
-		"runner":    true, // v0.4.0
-		"search":    true,
-		"project":   true, // v0.4.0
+		"auth":       true,
+		"workspace":  true,
+		"repo":       true,
+		"branch":     true,
+		"pr":         true,
+		"pipeline":   true,
+		"issue":      true,
+		"snippet":    true,
+		"status":     true,
+		"webhook":    true,
+		"runner":     true,
+		"search":     true,
+		"browse":     true,
+		"config":     true,
+		"alias":      true,
+		"variable":   true,
+		"deploy-key": true,
+		"ssh-key":    true,
+		"project":    true,
 	}
 	got := map[string]bool{}
 	for _, sub := range cmd.Commands() {

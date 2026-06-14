@@ -6,13 +6,18 @@ import (
 	"net/http"
 	"os"
 
+	"github.com/chandrasekar-r/bitbucket-cli/pkg/alias"
 	"github.com/chandrasekar-r/bitbucket-cli/pkg/api"
 	bbauth "github.com/chandrasekar-r/bitbucket-cli/pkg/auth"
+	aliascmd "github.com/chandrasekar-r/bitbucket-cli/pkg/cmd/alias"
 	apicmd "github.com/chandrasekar-r/bitbucket-cli/pkg/cmd/api"
 	batchcmd "github.com/chandrasekar-r/bitbucket-cli/pkg/cmd/batch"
+	browsecmd "github.com/chandrasekar-r/bitbucket-cli/pkg/cmd/browse"
 	"github.com/chandrasekar-r/bitbucket-cli/pkg/cmd/completion"
 	authcmd "github.com/chandrasekar-r/bitbucket-cli/pkg/cmd/auth"
 	branchcmd "github.com/chandrasekar-r/bitbucket-cli/pkg/cmd/branch"
+	configcmd "github.com/chandrasekar-r/bitbucket-cli/pkg/cmd/config"
+	deploykeycmd "github.com/chandrasekar-r/bitbucket-cli/pkg/cmd/deploy_key"
 	extcmd "github.com/chandrasekar-r/bitbucket-cli/pkg/cmd/extension"
 	issuecmd "github.com/chandrasekar-r/bitbucket-cli/pkg/cmd/issue"
 	pipelinecmd "github.com/chandrasekar-r/bitbucket-cli/pkg/cmd/pipeline"
@@ -21,8 +26,10 @@ import (
 	repocmd "github.com/chandrasekar-r/bitbucket-cli/pkg/cmd/repo"
 	runnercmd "github.com/chandrasekar-r/bitbucket-cli/pkg/cmd/runner"
 	searchcmd "github.com/chandrasekar-r/bitbucket-cli/pkg/cmd/search"
+	sshkeycmd "github.com/chandrasekar-r/bitbucket-cli/pkg/cmd/ssh_key"
 	snippetcmd "github.com/chandrasekar-r/bitbucket-cli/pkg/cmd/snippet"
 	statuscmd "github.com/chandrasekar-r/bitbucket-cli/pkg/cmd/status"
+	variablecmd "github.com/chandrasekar-r/bitbucket-cli/pkg/cmd/variable"
 	versioncmd "github.com/chandrasekar-r/bitbucket-cli/pkg/cmd/version"
 	webhookcmd "github.com/chandrasekar-r/bitbucket-cli/pkg/cmd/webhook"
 	workspacecmd "github.com/chandrasekar-r/bitbucket-cli/pkg/cmd/workspace"
@@ -181,6 +188,12 @@ Start with: bb auth login`,
 	cmd.AddCommand(webhookcmd.NewCmdWebhook(f))
 	cmd.AddCommand(runnercmd.NewCmdRunner(f))
 	cmd.AddCommand(searchcmd.NewCmdSearch(f))
+	cmd.AddCommand(browsecmd.NewCmdBrowse(f))
+	cmd.AddCommand(configcmd.NewCmdConfig(f))
+	cmd.AddCommand(aliascmd.NewCmdAlias(f))
+	cmd.AddCommand(variablecmd.NewCmdVariable(f))
+	cmd.AddCommand(deploykeycmd.NewCmdDeployKey(f))
+	cmd.AddCommand(sshkeycmd.NewCmdSSHKey(f))
 	cmd.AddCommand(projectcmd.NewCmdProject(f))
 	cmd.AddCommand(statuscmd.NewCmdStatus(f))
 	cmd.AddCommand(versioncmd.NewCmdVersion(f))
@@ -206,7 +219,17 @@ Start with: bb auth login`,
 
 // Execute runs the root command and exits with an appropriate code.
 func Execute() {
+	args := os.Args[1:]
+	if cfg, err := config.Load(); err == nil {
+		args = alias.Expand(args, cfg)
+	}
+	ExecuteWithArgs(args)
+}
+
+// ExecuteWithArgs runs the root command with explicit arguments (used by tests and alias expansion).
+func ExecuteWithArgs(args []string) {
 	cmd, _ := NewCmdRoot()
+	cmd.SetArgs(args)
 	if err := cmd.Execute(); err != nil {
 		fmt.Fprintf(os.Stderr, "Error: %s\n", err)
 		if hint := authHint(err, defaultListAccounts); hint != "" {

@@ -15,7 +15,15 @@ const (
 	KeyDefaultWorkspace = "default_workspace"
 	KeyAPIBaseURL       = "api_base_url"
 	KeyGitProtocol      = "git_protocol"
+	KeyAliases          = "aliases"
 )
+
+// KnownKeys are config keys managed by `bb config`.
+var KnownKeys = []string{
+	KeyDefaultWorkspace,
+	KeyAPIBaseURL,
+	KeyGitProtocol,
+}
 
 // Config wraps Viper for bb-specific configuration.
 type Config struct {
@@ -73,6 +81,48 @@ func (c *Config) DefaultWorkspace() string {
 // APIBaseURL returns the Bitbucket API base URL (allows overriding for testing).
 func (c *Config) APIBaseURL() string {
 	return c.v.GetString(KeyAPIBaseURL)
+}
+
+// ListSettings returns all known config key/value pairs.
+func (c *Config) ListSettings() map[string]string {
+	out := make(map[string]string, len(KnownKeys))
+	for _, key := range KnownKeys {
+		out[key] = c.v.GetString(key)
+	}
+	return out
+}
+
+// Aliases returns user-defined command aliases.
+func (c *Config) Aliases() map[string]string {
+	raw := c.v.GetStringMapString(KeyAliases)
+	if raw == nil {
+		return map[string]string{}
+	}
+	return raw
+}
+
+// SetAlias stores a command alias and persists config.
+func (c *Config) SetAlias(name, expansion string) error {
+	aliases := c.Aliases()
+	aliases[name] = expansion
+	c.v.Set(KeyAliases, aliases)
+	return c.writeConfig()
+}
+
+// DeleteAlias removes a command alias.
+func (c *Config) DeleteAlias(name string) error {
+	aliases := c.Aliases()
+	if _, ok := aliases[name]; !ok {
+		return fmt.Errorf("alias %q not found", name)
+	}
+	delete(aliases, name)
+	c.v.Set(KeyAliases, aliases)
+	return c.writeConfig()
+}
+
+// ConfigFilePath returns the path to the config file.
+func ConfigFilePath() string {
+	return filepath.Join(ConfigDir(), "config.yaml")
 }
 
 func (c *Config) writeConfig() error {
