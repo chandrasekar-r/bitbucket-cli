@@ -42,7 +42,7 @@
 <section class="hero">
   <div class="hero-content">
     <div class="hero-text">
-      <div class="hero-badge">Free &amp; Open Source &middot; v2.1.0</div>
+      <div class="hero-badge">Free &amp; Open Source &middot; v2.2.0</div>
       <h1 class="hero-headline">
         Take Bitbucket<br>to the command line.
       </h1>
@@ -115,22 +115,21 @@
           <div class="tl t05"><span class="col-id teal">76&nbsp;</span><span class="col-repo dim">frontend&nbsp;&nbsp;</span><span class="col-title">Dark mode toggle&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="yellow">1</span></div>
           <div class="tl t06 spacer">&nbsp;</div>
           <div class="tl t07 section-head">Awaiting Your Review</div>
-          <div class="tl t08 tbl-head"><span class="col-id">#&nbsp;&nbsp;</span><span class="col-repo">REPO&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="col-title">TITLE&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span>AUTHOR</span></div>
-          <div class="tl t09"><span class="col-id yellow">91&nbsp;</span><span class="col-repo dim">backend&nbsp;&nbsp;&nbsp;</span><span class="col-title">Add rate limiting&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="dim">alice</span></div>
-          <div class="tl t10 spacer">&nbsp;</div>
-          <div class="tl t11 dim">2 open PR(s), 1 awaiting review (8 repos scanned)</div>
+          <div class="tl t08"><span class="col-id yellow">91&nbsp;</span><span class="col-repo dim">backend&nbsp;&nbsp;&nbsp;</span><span class="col-title">Add rate limiting&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="dim">alice</span></div>
+          <div class="tl t09 spacer">&nbsp;</div>
+          <div class="tl t10 section-head">Assigned Issues</div>
+          <div class="tl t11"><span class="col-id teal">14&nbsp;</span><span class="col-repo dim">backend&nbsp;&nbsp;&nbsp;</span><span class="col-title">Fix OAuth token refresh&nbsp;&nbsp;</span><span class="dim">bug</span></div>
           <div class="tl t12 spacer">&nbsp;</div>
-          <div class="tl t13"><span class="prompt">~/projects/backend</span> <span class="cmd-text">$ bb branch tidy</span></div>
-          <div class="tl t14 spacer">&nbsp;</div>
-          <div class="tl t15 dim">Merged:</div>
-          <div class="tl t16">&nbsp;&nbsp;<span class="teal">feat/oauth-refactor</span> &nbsp;<span class="dim">(PR #82)</span></div>
-          <div class="tl t17">&nbsp;&nbsp;<span class="teal">fix/login-validation</span>&nbsp;<span class="dim">(PR #79)</span></div>
-          <div class="tl t18 spacer">&nbsp;</div>
-          <div class="tl t19 dim">Delete 2 local branch(es)?&nbsp;<span class="blue-bright">Yes</span></div>
-          <div class="tl t20">&nbsp;&nbsp;<span class="green">&#x2713;</span> Deleted feat/oauth-refactor</div>
-          <div class="tl t21">&nbsp;&nbsp;<span class="green">&#x2713;</span> Deleted fix/login-validation</div>
-          <div class="tl t22 spacer">&nbsp;</div>
-          <div class="tl t23"><span class="prompt">~/projects/backend</span>&nbsp;<span class="cursor">&#x2588;</span></div>
+          <div class="tl t13 section-head">Recent Pipeline Failures (24h)</div>
+          <div class="tl t14"><span class="red">#142</span> <span class="dim">backend &nbsp;main &nbsp;FAILED</span></div>
+          <div class="tl t15 spacer">&nbsp;</div>
+          <div class="tl t16 dim">2 open PR(s), 1 awaiting review, 1 issue, 1 failure (8 repos)</div>
+          <div class="tl t17 spacer">&nbsp;</div>
+          <div class="tl t18"><span class="prompt">~/projects/backend</span> <span class="cmd-text">$ bb pr checks 91</span></div>
+          <div class="tl t19"><span class="green">&#x2713;</span> <span class="dim">pipelines/main &nbsp;SUCCESSFUL</span></div>
+          <div class="tl t20"><span class="green">&#x2713;</span> <span class="dim">sonar/quality &nbsp;&nbsp;SUCCESSFUL</span></div>
+          <div class="tl t21 spacer">&nbsp;</div>
+          <div class="tl t22"><span class="prompt">~/projects/backend</span>&nbsp;<span class="cursor">&#x2588;</span></div>
         </div>
       </div>
     </div>
@@ -171,13 +170,37 @@
 
       <div class="card">
         <div class="card-label">Status Dashboard</div>
-        <div class="card-desc">Your morning standup, without opening a browser.</div>
+        <div class="card-desc">Your morning standup: open PRs, pending reviews, assigned issues, and recent pipeline failures.</div>
         <div class="card-code">
           <div class="code-line"><span class="sym">$</span> <span class="kw">bb status</span></div>
           <div class="code-line out"><span class="section-h">Your Open Pull Requests</span></div>
           <div class="code-line out"><span class="teal">89</span> <span class="dim">backend &nbsp;Auth middleware </span><span class="green">2&#x2713;</span></div>
           <div class="code-line out"><span class="section-h">Awaiting Your Review</span></div>
           <div class="code-line out"><span class="yellow">91</span> <span class="dim">backend &nbsp;Rate limiting (alice)</span></div>
+          <div class="code-line out"><span class="section-h">Assigned Issues</span></div>
+          <div class="code-line out"><span class="teal">14</span> <span class="dim">backend &nbsp;Fix OAuth token refresh</span></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-label">PR Checks &amp; Review</div>
+        <div class="card-desc">See CI status on a PR, list comment threads, approve, or request changes — all from the terminal.</div>
+        <div class="card-code">
+          <div class="code-line"><span class="sym">$</span> <span class="kw">bb pr checks</span> <span class="str">91</span></div>
+          <div class="code-line out"><span class="green">&#x2713;</span> <span class="dim">pipelines/main &nbsp;SUCCESSFUL</span></div>
+          <div class="code-line"><span class="sym">$</span> <span class="kw">bb pr comment list</span> <span class="str">91</span></div>
+          <div class="code-line"><span class="sym">$</span> <span class="kw">bb pr review</span> <span class="str">91</span> <span class="flag">--approve</span></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-label">Search &amp; Browse</div>
+        <div class="card-desc">Search code and repos in your workspace, then open the right page in your browser.</div>
+        <div class="card-code">
+          <div class="code-line"><span class="sym">$</span> <span class="kw">bb search code</span> <span class="str">"func main"</span></div>
+          <div class="code-line out"><span class="dim">pkg/auth/oauth.go</span></div>
+          <div class="code-line"><span class="sym">$</span> <span class="kw">bb browse</span> <span class="flag">--pr</span> <span class="str">91</span></div>
+          <div class="code-line out"><span class="dim">Opening https://bitbucket.org/...</span></div>
         </div>
       </div>
 
@@ -334,7 +357,7 @@
       </details>
 
       <details class="cmd-group">
-        <summary><span class="grp-name">pr</span><span class="grp-count">11 commands</span></summary>
+        <summary><span class="grp-name">pr</span><span class="grp-count">15 commands</span></summary>
         <table class="cmd-table">
           <tr><td><code>bb pr list</code></td><td>List open PRs (<code>--state</code> for MERGED/DECLINED)</td></tr>
           <tr><td><code>bb pr view [number]</code></td><td>Show PR details</td></tr>
@@ -342,11 +365,24 @@
           <tr><td><code>bb pr edit [number]</code></td><td>Edit title, description, base, or reviewers</td></tr>
           <tr><td><code>bb pr merge [number]</code></td><td>Merge a PR (<code>--strategy</code> merge_commit/squash/fast_forward)</td></tr>
           <tr><td><code>bb pr approve [number]</code></td><td>Approve a PR</td></tr>
+          <tr><td><code>bb pr unapprove [number]</code></td><td>Remove your approval from a PR</td></tr>
+          <tr><td><code>bb pr review [number]</code></td><td>Approve (<code>--approve</code>) or request changes (<code>--request-changes</code>)</td></tr>
           <tr><td><code>bb pr decline [number]</code></td><td>Decline a PR</td></tr>
           <tr><td><code>bb pr checkout [number]</code></td><td>Check out PR source branch locally</td></tr>
-          <tr><td><code>bb pr comment [number]</code></td><td>Add a comment; <code>--file</code>/<code>--line</code> for inline diff comments, <code>--format-help</code> for Markdown reference</td></tr>
+          <tr><td><code>bb pr comment add [number]</code></td><td>Add a comment; <code>--file</code>/<code>--line</code> for inline diff comments</td></tr>
+          <tr><td><code>bb pr comment list [number]</code></td><td>List PR comments and replies</td></tr>
+          <tr><td><code>bb pr comment reply [number]</code></td><td>Reply to a comment (<code>--parent</code>, <code>--body</code>)</td></tr>
+          <tr><td><code>bb pr checks [number]</code></td><td>Show commit/build statuses for a PR</td></tr>
           <tr><td><code>bb pr diff [number]</code></td><td>Show unified diff</td></tr>
           <tr><td><code>bb pr browse [number]</code></td><td>Open in browser</td></tr>
+        </table>
+      </details>
+
+      <details class="cmd-group">
+        <summary><span class="grp-name">search</span><span class="grp-count">2 commands &middot; new in v2.2.0</span></summary>
+        <table class="cmd-table">
+          <tr><td><code>bb search code &lt;query&gt;</code></td><td>Search code in the active workspace</td></tr>
+          <tr><td><code>bb search repos &lt;query&gt;</code></td><td>Search repositories by name</td></tr>
         </table>
       </details>
 
@@ -422,7 +458,63 @@
       <details class="cmd-group">
         <summary><span class="grp-name">status</span><span class="grp-count">1 command</span></summary>
         <table class="cmd-table">
-          <tr><td><code>bb status</code></td><td>Cross-repo dashboard: your open PRs and pending reviews</td></tr>
+          <tr><td><code>bb status</code></td><td>Cross-repo dashboard: open PRs, pending reviews, assigned issues, recent pipeline failures</td></tr>
+        </table>
+      </details>
+
+      <details class="cmd-group">
+        <summary><span class="grp-name">browse</span><span class="grp-count">1 command &middot; new in v2.2.0</span></summary>
+        <table class="cmd-table">
+          <tr><td><code>bb browse</code></td><td>Open current repo in browser (<code>--pr</code>, <code>--issue</code>, <code>--branch</code>, <code>--pipeline</code>, <code>--settings</code>, <code>--commits</code>)</td></tr>
+        </table>
+      </details>
+
+      <details class="cmd-group">
+        <summary><span class="grp-name">config</span><span class="grp-count">4 commands &middot; new in v2.2.0</span></summary>
+        <table class="cmd-table">
+          <tr><td><code>bb config get &lt;key&gt;</code></td><td>Print a config value</td></tr>
+          <tr><td><code>bb config set &lt;key&gt; &lt;value&gt;</code></td><td>Set a config value</td></tr>
+          <tr><td><code>bb config list</code></td><td>List all config values and aliases</td></tr>
+          <tr><td><code>bb config edit</code></td><td>Open config file in <code>$EDITOR</code></td></tr>
+        </table>
+      </details>
+
+      <details class="cmd-group">
+        <summary><span class="grp-name">alias</span><span class="grp-count">3 commands &middot; new in v2.2.0</span></summary>
+        <table class="cmd-table">
+          <tr><td><code>bb alias set &lt;name&gt; &lt;expansion&gt;</code></td><td>Create a command shortcut</td></tr>
+          <tr><td><code>bb alias list</code></td><td>List configured aliases</td></tr>
+          <tr><td><code>bb alias delete &lt;name&gt;</code></td><td>Remove an alias</td></tr>
+        </table>
+      </details>
+
+      <details class="cmd-group">
+        <summary><span class="grp-name">variable</span><span class="grp-count">5 commands &middot; new in v2.2.0</span></summary>
+        <table class="cmd-table">
+          <tr><td><code>bb variable list</code></td><td>List pipeline variables (repo, <code>--workspace</code>, or <code>--env</code>)</td></tr>
+          <tr><td><code>bb variable set KEY VALUE</code></td><td>Set a variable (<code>--secured</code> for secrets)</td></tr>
+          <tr><td><code>bb variable delete KEY</code></td><td>Delete a variable by key name</td></tr>
+          <tr><td><code>bb variable env list</code></td><td>List deployment environments</td></tr>
+          <tr><td><code>bb variable env create NAME</code></td><td>Create a deployment environment</td></tr>
+        </table>
+      </details>
+
+      <details class="cmd-group">
+        <summary><span class="grp-name">deploy-key</span><span class="grp-count">4 commands &middot; new in v2.2.0</span></summary>
+        <table class="cmd-table">
+          <tr><td><code>bb deploy-key list</code></td><td>List repository deploy keys</td></tr>
+          <tr><td><code>bb deploy-key add</code></td><td>Add a deploy key (<code>--key</code> or <code>--key-file</code>, <code>--label</code>)</td></tr>
+          <tr><td><code>bb deploy-key view &lt;id&gt;</code></td><td>View deploy key metadata</td></tr>
+          <tr><td><code>bb deploy-key delete &lt;id&gt;</code></td><td>Delete a deploy key</td></tr>
+        </table>
+      </details>
+
+      <details class="cmd-group">
+        <summary><span class="grp-name">ssh-key</span><span class="grp-count">3 commands &middot; new in v2.2.0</span></summary>
+        <table class="cmd-table">
+          <tr><td><code>bb ssh-key list</code></td><td>List your SSH keys</td></tr>
+          <tr><td><code>bb ssh-key add</code></td><td>Add an SSH key (<code>--key</code> or <code>--key-file</code>, <code>--label</code>)</td></tr>
+          <tr><td><code>bb ssh-key delete &lt;uuid&gt;</code></td><td>Delete an SSH key</td></tr>
         </table>
       </details>
 

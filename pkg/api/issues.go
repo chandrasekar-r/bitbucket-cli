@@ -3,6 +3,7 @@ package api
 import (
 	"encoding/json"
 	"fmt"
+	"net/url"
 )
 
 // Issue represents a Bitbucket Cloud issue.
@@ -62,12 +63,16 @@ type ListIssuesOptions struct {
 
 // ListIssues returns issues for a repository.
 func (c *Client) ListIssues(workspace, slug string, opts ListIssuesOptions) ([]Issue, error) {
-	q := "?pagelen=50"
+	filter := ""
 	if opts.State != "" {
-		q += "&q=status%3D%22" + opts.State + "%22"
+		filter = fmt.Sprintf(`status="%s"`, opts.State)
 	} else {
-		q += `&q=status%3D%22new%22+OR+status%3D%22open%22`
+		filter = `status="new" OR status="open"`
 	}
+	if opts.Assignee != "" {
+		filter += fmt.Sprintf(` AND assignee.nickname="%s"`, opts.Assignee)
+	}
+	q := "?pagelen=50&q=" + url.QueryEscape(filter)
 	path := fmt.Sprintf("/repositories/%s/%s/issues%s", workspace, slug, q)
 	items, err := PaginateAll(c, path, opts.Limit)
 	if err != nil {

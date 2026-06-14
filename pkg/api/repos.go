@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/url"
+	"strings"
 )
 
 // Repository represents a Bitbucket Cloud repository.
@@ -62,13 +63,21 @@ type ListReposOptions struct {
 	Limit    int
 	Language string
 	Role     string // "owner", "member", "contributor"
+	Query    string // Bitbucket q filter, e.g. name ~ "term"
 }
 
 // ListRepos returns repositories in a workspace.
 func (c *Client) ListRepos(workspace string, opts ListReposOptions) ([]Repository, error) {
 	q := url.Values{"pagelen": {"100"}}
+	var filters []string
 	if opts.Language != "" {
-		q.Set("q", fmt.Sprintf(`language="%s"`, opts.Language))
+		filters = append(filters, fmt.Sprintf(`language="%s"`, opts.Language))
+	}
+	if opts.Query != "" {
+		filters = append(filters, fmt.Sprintf(`name ~ "%s"`, opts.Query))
+	}
+	if len(filters) > 0 {
+		q.Set("q", strings.Join(filters, " AND "))
 	}
 	if opts.Role != "" {
 		q.Set("role", opts.Role)
