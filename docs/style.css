@@ -336,14 +336,9 @@ img, svg { display: block; }
 .copy-btn.copied .icon-check { display: block; }
 .copy-btn.copied { color: var(--teal); border-color: rgba(20,184,166,.4); }
 
-/* ── Terminal window ── */
+/* ── Terminal window (entrance handled by GSAP) ── */
 .hero-terminal {
-  animation: slideUp .8s ease both;
-  animation-delay: .2s;
-}
-@keyframes slideUp {
-  from { opacity: 0; transform: translateY(32px); }
-  to   { opacity: 1; transform: translateY(0); }
+  will-change: transform, opacity;
 }
 .terminal-window {
   background: #0A0C14;
@@ -384,40 +379,34 @@ img, svg { display: block; }
   overflow: hidden;
 }
 
-/* Terminal lines — staggered fade-in */
+/* Terminal lines — staggered reveal via GSAP */
 .tl {
   opacity: 0;
   white-space: pre;
-  animation: tl-appear .15s ease forwards;
 }
-.tl.spacer { animation-duration: 0s; }
+.tl.spacer { opacity: 1; }
 
-.t01 { animation-delay: .3s; }
-.t02 { animation-delay: .55s; }
-.t03 { animation-delay: .65s; }
-.t04 { animation-delay: .75s; }
-.t05 { animation-delay: .85s; }
-.t06 { animation-delay: .9s; }
-.t07 { animation-delay: .95s; }
-.t08 { animation-delay: 1.05s; }
-.t09 { animation-delay: 1.15s; }
-.t10 { animation-delay: 1.2s; }
-.t11 { animation-delay: 1.25s; }
-.t12 { animation-delay: 1.3s; }
-.t13 { animation-delay: 1.45s; }
-.t14 { animation-delay: 1.6s; }
-.t15 { animation-delay: 1.7s; }
-.t16 { animation-delay: 1.85s; }
-.t17 { animation-delay: 1.95s; }
-.t18 { animation-delay: 2.05s; }
-.t19 { animation-delay: 2.15s; }
-.t20 { animation-delay: 2.25s; }
-.t21 { animation-delay: 2.35s; }
-.t22 { animation-delay: 2.45s; }
-
-@keyframes tl-appear {
-  from { opacity: 0; }
-  to   { opacity: 1; }
+/* Reduced motion: show everything immediately */
+html.motion-reduced .tl,
+html.motion-reduced .hero-terminal,
+html.motion-reduced .hero-badge,
+html.motion-reduced .hero-headline,
+html.motion-reduced .hero-sub,
+html.motion-reduced .install-block,
+html.motion-reduced .hero-cta,
+html.motion-reduced .card,
+html.motion-reduced .feature,
+html.motion-reduced .cmd-group,
+html.motion-reduced .install-card,
+html.motion-reduced .section-label,
+html.motion-reduced .section-title,
+html.motion-reduced .install-note,
+html.motion-reduced .footer-inner {
+  opacity: 1 !important;
+  transform: none !important;
+}
+html.motion-reduced .cursor {
+  opacity: 1;
 }
 
 /* Terminal colors */
@@ -435,12 +424,13 @@ img, svg { display: block; }
 .terminal-body .col-repo { display: inline-block; width: 10ch; }
 .terminal-body .col-title { display: inline-block; width: 26ch; }
 
-/* Blinking cursor */
+/* Blinking cursor (activates after GSAP terminal sequence) */
 .cursor {
   color: var(--text);
-  animation: blink 1.1s step-end infinite;
-  animation-delay: 2.7s;
   opacity: 0;
+}
+.cursor.cursor-active {
+  animation: blink 1.1s step-end infinite;
 }
 @keyframes blink {
   0%,100% { opacity: 1; }

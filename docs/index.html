@@ -656,6 +656,9 @@
   </div>
 </footer>
 
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
+<script src="animations.js"></script>
 <script>
 /* Copy buttons — use CSS class toggle, no innerHTML mutation */
 document.querySelectorAll('.copy-btn').forEach(function(btn) {
@@ -677,7 +680,7 @@ navToggle.addEventListener('click', function() {
   navToggle.setAttribute('aria-expanded', String(isOpen));
 });
 
-/* Sticky nav shadow on scroll */
+/* Sticky nav background on scroll */
 var navEl = document.getElementById('nav');
 window.addEventListener('scroll', function() {
   navEl.classList.toggle('scrolled', window.scrollY > 10);
