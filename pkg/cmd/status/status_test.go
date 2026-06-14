@@ -2,6 +2,7 @@ package status
 
 import (
 	"testing"
+	"time"
 
 	"github.com/chandrasekar-r/bitbucket-cli/pkg/api"
 )
@@ -126,6 +127,67 @@ func TestTruncate(t *testing.T) {
 		if got != tt.want {
 			t.Errorf("truncate(%q, %d) = %q, want %q", tt.input, tt.max, got, tt.want)
 		}
+	}
+}
+
+func TestIsRecentPipelineFailure(t *testing.T) {
+	cutoff := time.Now().Add(-24 * time.Hour)
+	recent := time.Now().Add(-1 * time.Hour).Format(time.RFC3339)
+	old := time.Now().Add(-48 * time.Hour).Format(time.RFC3339)
+
+	tests := []struct {
+		name string
+		p    api.Pipeline
+		want bool
+	}{
+		{
+			name: "failed within window",
+			p: api.Pipeline{
+				CreatedOn: recent,
+				State: api.PipelineState{
+					Name: "COMPLETED",
+					Result: &struct {
+						Name string `json:"name"`
+					}{Name: "FAILED"},
+				},
+			},
+			want: true,
+		},
+		{
+			name: "successful ignored",
+			p: api.Pipeline{
+				CreatedOn: recent,
+				State: api.PipelineState{
+					Name: "COMPLETED",
+					Result: &struct {
+						Name string `json:"name"`
+					}{Name: "SUCCESSFUL"},
+				},
+			},
+			want: false,
+		},
+		{
+			name: "failed but too old",
+			p: api.Pipeline{
+				CreatedOn: old,
+				State: api.PipelineState{
+					Name: "COMPLETED",
+					Result: &struct {
+						Name string `json:"name"`
+					}{Name: "ERROR"},
+				},
+			},
+			want: false,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got := isRecentPipelineFailure(tt.p, cutoff)
+			if got != tt.want {
+				t.Errorf("isRecentPipelineFailure() = %v, want %v", got, tt.want)
+			}
+		})
 	}
 }
 

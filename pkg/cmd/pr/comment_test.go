@@ -75,7 +75,7 @@ func TestCommentCmd_LineLevelInline(t *testing.T) {
 	defer srv.Close()
 
 	f, stdout := commentFactory(t, srv)
-	cmd := newCmdComment(f)
+	cmd := newCmdCommentAdd(f)
 	cmd.SilenceUsage = true
 	cmd.SetArgs([]string{"5", "--file", "pkg/api/prs.go", "--line", "42", "--body", "looks good"})
 
@@ -114,7 +114,7 @@ func TestCommentCmd_FileLevelInline(t *testing.T) {
 	defer srv.Close()
 
 	f, stdout := commentFactory(t, srv)
-	cmd := newCmdComment(f)
+	cmd := newCmdCommentAdd(f)
 	cmd.SilenceUsage = true
 	cmd.SetArgs([]string{"5", "--file", "pkg/api/prs.go", "--body", "file looks good"})
 
@@ -156,7 +156,7 @@ func TestCommentCmd_GenericComment(t *testing.T) {
 	defer srv.Close()
 
 	f, stdout := commentFactory(t, srv)
-	cmd := newCmdComment(f)
+	cmd := newCmdCommentAdd(f)
 	cmd.SilenceUsage = true
 	cmd.SetArgs([]string{"5", "--body", "LGTM"})
 
@@ -183,7 +183,7 @@ func TestCommentCmd_LineWithoutFile(t *testing.T) {
 	defer dummy.Close()
 
 	f, _ := commentFactory(t, dummy)
-	cmd := newCmdComment(f)
+	cmd := newCmdCommentAdd(f)
 	cmd.SilenceUsage = true
 	cmd.SetArgs([]string{"5", "--line", "42", "--body", "x"})
 
@@ -204,7 +204,7 @@ func TestCommentCmd_LineZero(t *testing.T) {
 	defer dummy.Close()
 
 	f, _ := commentFactory(t, dummy)
-	cmd := newCmdComment(f)
+	cmd := newCmdCommentAdd(f)
 	cmd.SilenceUsage = true
 	cmd.SetArgs([]string{"5", "--file", "main.go", "--line", "0", "--body", "x"})
 
@@ -228,7 +228,7 @@ func TestCommentCmd_LineNegative(t *testing.T) {
 	defer dummy.Close()
 
 	f, _ := commentFactory(t, dummy)
-	cmd := newCmdComment(f)
+	cmd := newCmdCommentAdd(f)
 	cmd.SilenceUsage = true
 	// Use --line=-1 form to avoid pflag ambiguity with negative-value args.
 	cmd.SetArgs([]string{"5", "--file", "main.go", "--line=-1", "--body", "x"})
@@ -250,7 +250,7 @@ func TestCommentCmd_EmptyFile(t *testing.T) {
 	defer dummy.Close()
 
 	f, _ := commentFactory(t, dummy)
-	cmd := newCmdComment(f)
+	cmd := newCmdCommentAdd(f)
 	cmd.SilenceUsage = true
 	cmd.SetArgs([]string{"5", "--file", "", "--body", "x"})
 
@@ -275,7 +275,7 @@ func TestCommentCmd_EmptyBodyNoTTY(t *testing.T) {
 
 	f, _ := commentFactory(t, dummy)
 	// IOStreams backed by a Buffer → IsStdoutTTY() = false (no-TTY mode).
-	cmd := newCmdComment(f)
+	cmd := newCmdCommentAdd(f)
 	cmd.SilenceUsage = true
 	// No --body → triggers body-required error.
 	cmd.SetArgs([]string{"5", "--file", "foo.go"})
@@ -304,7 +304,7 @@ func TestCommentCmd_APIError400(t *testing.T) {
 	defer srv.Close()
 
 	f, _ := commentFactory(t, srv)
-	cmd := newCmdComment(f)
+	cmd := newCmdCommentAdd(f)
 	cmd.SilenceUsage = true
 	cmd.SetArgs([]string{"5", "--file", "main.go", "--line", "1", "--body", "x"})
 
@@ -344,7 +344,7 @@ func TestCommentCmd_InlineVsGenericRouting(t *testing.T) {
 			defer srv.Close()
 
 			f, _ := commentFactory(t, srv)
-			cmd := newCmdComment(f)
+			cmd := newCmdCommentAdd(f)
 			cmd.SilenceUsage = true
 			cmd.SetArgs(tt.args)
 

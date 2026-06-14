@@ -10,6 +10,24 @@ All notable changes to `bb` are documented here. Dates are UTC. Versions follow 
 
 - **`bb pr checks`** — show commit/build statuses (pipelines, Jenkins, Sonar, etc.) for a pull request's source commit. Supports `--json`/`--jq` and a colored TTY table.
 - **`bb search`** — search code (`bb search code <query>`) and repositories (`bb search repos <query>`) in the active workspace. Surfaces a friendly message when code search is disabled.
+- **`bb status` v2** — dashboard now includes issues assigned to you and pipeline failures from the last 24 hours (in addition to open PRs and pending reviews).
+- **`bb pr comment`** — now a subgroup: `add`, `list`, `reply`. Use `bb pr comment add` instead of `bb pr comment`.
+- **`bb pr unapprove`** — remove your approval from a pull request.
+- **`bb pr review`** — approve (`--approve`) or request changes (`--request-changes` with optional `--body`).
+- **`bb browse`** — top-level context-aware browser opener (`--pr`, `--issue`, `--branch`, `--pipeline`, `--settings`, `--commits`).
+- **`bb config`** — `get`, `set`, `list`, `edit` for CLI settings.
+- **`bb alias`** — `set`, `list`, `delete` command shortcuts (expanded before Cobra parses args).
+- **`bb variable`** — pipeline variables at workspace, repo, and deployment scopes; `env list`/`env create` for deployment environments.
+- **`bb deploy-key`** — repository deploy key `list`, `add`, `view`, `delete`.
+- **`bb ssh-key`** — user SSH key `list`, `add`, `delete`.
+
+### Breaking changes
+
+- **`bb pr comment`** is now `bb pr comment add` (subgroup). Update scripts accordingly.
+
+### Upgrade notes
+
+Pipeline variable and deploy-key commands may require additional OAuth scopes. Run `bb auth login` after upgrading if you see 403 errors.
 
 ---
 

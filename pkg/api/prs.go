@@ -269,6 +269,54 @@ func (c *Client) UpdatePR(workspace, slug string, id int, opts UpdatePROptions) 
 	return &pr, nil
 }
 
+// PRComment represents a comment on a pull request (general or inline).
+type PRComment struct {
+	ID        int    `json:"id"`
+	CreatedOn string `json:"created_on"`
+	Content   struct {
+		Raw string `json:"raw"`
+	} `json:"content"`
+	User struct {
+		DisplayName string `json:"display_name"`
+		Username    string `json:"nickname"`
+	} `json:"user"`
+	Parent *struct {
+		ID int `json:"id"`
+	} `json:"parent"`
+	Inline *struct {
+		Path string `json:"path"`
+		To   int    `json:"to"`
+	} `json:"inline"`
+}
+
+// ListPRComments returns comments on a pull request.
+func (c *Client) ListPRComments(workspace, slug string, prID, limit int) ([]PRComment, error) {
+	path := fmt.Sprintf("/repositories/%s/%s/pullrequests/%d/comments?pagelen=50&sort=id",
+		workspace, slug, prID)
+	items, err := PaginateAll(c, path, limit)
+	if err != nil {
+		return nil, fmt.Errorf("listing PR comments: %w", err)
+	}
+	comments := make([]PRComment, 0, len(items))
+	for _, raw := range items {
+		var cmt PRComment
+		if err := json.Unmarshal(raw, &cmt); err == nil && cmt.ID != 0 {
+			comments = append(comments, cmt)
+		}
+	}
+	return comments, nil
+}
+
+// ReplyPRComment posts a reply to an existing PR comment.
+func (c *Client) ReplyPRComment(workspace, slug string, prID, parentID int, content string) error {
+	body := map[string]interface{}{
+		"content": map[string]string{"raw": content},
+		"parent":  map[string]int{"id": parentID},
+	}
+	path := fmt.Sprintf("/repositories/%s/%s/pullrequests/%d/comments", workspace, slug, prID)
+	return c.Post(path, body, nil)
+}
+
 // AddPRComment adds a general comment to a pull request.
 func (c *Client) AddPRComment(workspace, slug string, id int, content string) error {
 	body := map[string]interface{}{
